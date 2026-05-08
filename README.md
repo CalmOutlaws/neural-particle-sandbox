@@ -64,7 +64,7 @@ particle-sandbox/
 Since this project uses ES6 Modules, it must be served through a web server to avoid CORS issues.
 
 1. Clone the repository:
-    git clone [https://github.com/CalmOutlaws/neural-particle-sandbox.git](https://github.com/YOUR_USERNAME/neural-particle-sandbox.git)
+    git clone [https://github.com/YOUR_USERNAME/neural-particle-sandbox.git](https://github.com/YOUR_USERNAME/neural-particle-sandbox.git)
 
 2. **Navigate to the folder and start a local server:**
    - **VS Code:** Use the [Live Server](https://marketplace.visualstudio.com/items?itemName=ritwickdey.LiveServer)      extension.
