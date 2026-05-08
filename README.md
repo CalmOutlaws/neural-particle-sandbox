@@ -8,6 +8,11 @@ A high-performance, interactive 3D particle simulation that bridges the gap betw
 
 ---
 
+## 🚀 Live Demo
+**[Check out the Live Experience here!](https://calmoutlaws.github.io/neural-particle-sandbox/)**
+
+---
+
 ## 🌟 Key Features
 
 ### 🖐️ Neural Hand Tracking
