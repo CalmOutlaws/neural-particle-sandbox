@@ -8,11 +8,6 @@ A high-performance, interactive 3D particle simulation that bridges the gap betw
 
 ---
 
-## 🚀 Live Demo
-**[Check out the Live Experience here!](https://CalmOutlaws.github.io/neural-particle-sandbox/)**
-
----
-
 ## 🌟 Key Features
 
 ### 🖐️ Neural Hand Tracking
@@ -69,7 +64,7 @@ particle-sandbox/
 Since this project uses ES6 Modules, it must be served through a web server to avoid CORS issues.
 
 1. Clone the repository:
-    git clone [https://github.com/YOUR_USERNAME/neural-particle-sandbox.git](https://github.com/YOUR_USERNAME/neural-particle-sandbox.git)
+    git clone [https://github.com/CalmOutlaws/neural-particle-sandbox.git](https://github.com/YOUR_USERNAME/neural-particle-sandbox.git)
 
 2. **Navigate to the folder and start a local server:**
    - **VS Code:** Use the [Live Server](https://marketplace.visualstudio.com/items?itemName=ritwickdey.LiveServer)      extension.
@@ -83,7 +78,7 @@ Distributed under the MIT License. See `LICENSE` for more information.
 
 ---
 
-**Developed by [Monish M]**  
+**Developed by Monish M**  
 *Creative technologist exploring the intersection of AI and 3D graphics.*
 
 ---
