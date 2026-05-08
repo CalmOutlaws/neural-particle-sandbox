@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Neural Particle Sandbox | 3D Interactive Experience</title>
+    
+    <!-- Meta tags for Social Media / Portfolio Thumbnails -->
+    <meta name="description" content="A real-time 3D particle system controlled by hand gestures using Three.js and MediaPipe.">
+    <meta name="author" content="Your Name">
+
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+    
+    <!-- Stylesheets -->
+    <link rel="stylesheet" href="css/style.css">
+
+    <!-- MediaPipe Core Libraries -->
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js" crossorigin="anonymous"></script>
+    
+    <!-- Import Map for Modern Three.js handling -->
+    <script type="importmap">
+    {
+      "imports": {
+        "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+        "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+      }
+    }
+    </script>
+</head>
+<body>
+
+    <!-- Professional Loading Overlay -->
+    <div id="loading">
+        <div class="spinner"></div>
+        <p>Initializing Neural Tracking...</p>
+    </div>
+    
+    <!-- Interactive Radar (Webcam View) -->
+    <div id="webcam-container">
+        <video id="webcam" autoplay playsinline></video>
+        <canvas id="output_canvas" width="640" height="480"></canvas>
+    </div>
+
+    <!-- Control Panel -->
+    <div id="ui-panel">
+        <header>
+            <h3>Particle Sandbox</h3>
+            <span class="badge">v2.0 PRO</span>
+        </header>
+
+        <div class="control-group">
+            <label>Geometry Templates</label>
+            <div class="btn-grid">
+                <button class="active" data-shape="heart">Heart</button>
+                <button data-shape="flower">Flower</button>
+                <button data-shape="saturn">Saturn</button>
+                <button data-shape="buddha">Buddha</button>
+                <button data-shape="firework">Firework</button>
+            </div>
+        </div>
+
+        <div class="control-group">
+            <label>Interface Accent</label>
+            <input type="color" id="colorPicker" value="#00ffcc">
+        </div>
+
+        <div class="hint-box">
+            <p><strong>Pinch (Index + Thumb)</strong> to grab and move 3D objects.</p>
+            <p><strong>Flick your hand</strong> to apply momentum and throw objects.</p>
+            <p><strong>Open palm</strong> to increase particle turbulence.</p>
+        </div>
+    </div>
+
+    <!-- Entry Point for the Application Logic -->
+    <script type="module" src="js/main.js"></script>
+
+</body>
+</html>
