@@ -5,9 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Neural Particle Sandbox | 3D Interactive Experience</title>
     
-    <!-- Meta tags for Social Media / Portfolio Thumbnails -->
-    <meta name="description" content="A real-time 3D particle system controlled by hand gestures using Three.js and MediaPipe.">
-    <meta name="author" content="Your Name">
+    <meta name="description" content="A real-time 3D particle system controlled by complex hand gestures.">
+    <meta name="author" content="Monish M">
 
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
@@ -32,42 +31,48 @@
 </head>
 <body>
 
-    <!-- Professional Loading Overlay -->
+    <!-- Loading Overlay -->
     <div id="loading">
         <div class="spinner"></div>
-        <p>Initializing Neural Tracking...</p>
+        <p>Calibrating Neural Sensors...</p>
     </div>
     
-    <!-- Interactive Radar (Webcam View) -->
+    <!-- Webcam Radar -->
     <div id="webcam-container">
         <video id="webcam" autoplay playsinline></video>
         <canvas id="output_canvas" width="640" height="480"></canvas>
     </div>
-    <div class="control-group">
-    <label>Manual Spawn</label>
-    <button id="addShapeBtn">+ Add New Object</button>
-</div>
 
     <!-- Control Panel -->
     <div id="ui-panel">
-    <header>
-        <h3>Neural Sandbox</h3>
-        <span class="badge" style="background: #ff007f;">Active</span>
-    </header>
+        <header>
+            <h3>Neural Sandbox</h3>
+            <span class="badge">v3.0 Ultra</span>
+        </header>
 
-    <div class="control-group">
-        <p style="font-size: 0.8rem; opacity: 0.7;">One object. Pure physics.</p>
-        <button id="resetBtn" style="width: 100%; margin-top: 10px;">Reset Position</button>
+        <div class="control-group">
+            <label>Morph Geometry</label>
+            <button id="shapeSphere">Sphere Mode</button>
+            <button id="shapeHeart">Heart Mode</button>
+        </div>
+
+        <div class="control-group">
+            <label>Neural Color</label>
+            <input type="color" id="colorPicker" value="#ff007f">
+        </div>
+
+        <div class="control-group">
+            <button id="resetBtn">Reset Transformation</button>
+        </div>
+
+        <div class="hint-box">
+            <p><strong>• Rotate Palm:</strong> Tilt the central object.</p>
+            <p><strong>• Dual Pinch:</strong> Grab with both hands.</p>
+            <p><strong>• Expand Hand:</strong> Burst the particles.</p>
+        </div>
     </div>
 
-    <div class="hint-box">
-        <p><strong>Open hand</strong> to expand particles.</p>
-        <p><strong>Close hand</strong> to contract.</p>
-        <p><strong>Pinch</strong> to grab sphere.</p>
-    </div>
-</div>
-
-    <!-- Entry Point for the Application Logic -->
+    <!-- Main Logic Entry -->
     <script type="module" src="js/main.js"></script>
 
 </body>
