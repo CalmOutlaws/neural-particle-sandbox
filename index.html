@@ -50,33 +50,22 @@
 
     <!-- Control Panel -->
     <div id="ui-panel">
-        <header>
-            <h3>Particle Sandbox</h3>
-            <span class="badge">v2.0 PRO</span>
-        </header>
+    <header>
+        <h3>Neural Sandbox</h3>
+        <span class="badge" style="background: #ff007f;">Active</span>
+    </header>
 
-        <div class="control-group">
-            <label>Geometry Templates</label>
-            <div class="btn-grid">
-                <button class="active" data-shape="heart">Heart</button>
-                <button data-shape="flower">Flower</button>
-                <button data-shape="saturn">Saturn</button>
-                <button data-shape="buddha">Buddha</button>
-                <button data-shape="firework">Firework</button>
-            </div>
-        </div>
-
-        <div class="control-group">
-            <label>Interface Accent</label>
-            <input type="color" id="colorPicker" value="#00ffcc">
-        </div>
-
-        <div class="hint-box">
-            <p><strong>Pinch (Index + Thumb)</strong> to grab and move 3D objects.</p>
-            <p><strong>Flick your hand</strong> to apply momentum and throw objects.</p>
-            <p><strong>Open palm</strong> to increase particle turbulence.</p>
-        </div>
+    <div class="control-group">
+        <p style="font-size: 0.8rem; opacity: 0.7;">One object. Pure physics.</p>
+        <button id="resetBtn" style="width: 100%; margin-top: 10px;">Reset Position</button>
     </div>
+
+    <div class="hint-box">
+        <p><strong>Open hand</strong> to expand particles.</p>
+        <p><strong>Close hand</strong> to contract.</p>
+        <p><strong>Pinch</strong> to grab sphere.</p>
+    </div>
+</div>
 
     <!-- Entry Point for the Application Logic -->
     <script type="module" src="js/main.js"></script>
