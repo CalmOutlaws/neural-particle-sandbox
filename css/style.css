@@ -187,3 +187,50 @@ canvas {
     width: 100vw;
     height: 100vh;
 }
+
+
+
+@media (max-width: 768px) {
+    #ui-panel {
+        top: auto;
+        bottom: 20px;
+        right: 10px;
+        left: 10px;
+        width: calc(100% - 20px);
+        padding: 15px;
+        border-radius: 15px;
+    }
+    #webcam-container {
+        top: 10px;
+        left: 10px;
+        width: 140px;
+        height: 105px;
+        border-width: 1px;
+    }
+
+    /* Hide instructions on mobile to save space */
+    .hint-box {
+        display: none;
+    }
+
+    header {
+        margin-bottom: 10px;
+    }
+
+    .control-group {
+        margin-bottom: 10px;
+        display: flex;
+        gap: 10px;
+        align-items: center;
+    }
+
+    .control-group label {
+        display: none; /* Save vertical space */
+    }
+
+    button {
+        padding: 10px;
+        font-size: 0.75rem;
+        margin-bottom: 0;
+    }
+}
