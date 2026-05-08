@@ -174,3 +174,13 @@ input[type="color"] {
     0% { transform: rotate(0deg); }
     100% { transform: rotate(360deg); }
 }
+
+#output_canvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 5; /* Ensure it sits on top of the video */
+    pointer-events: none; /* Let clicks pass through to video/ui */
+}
