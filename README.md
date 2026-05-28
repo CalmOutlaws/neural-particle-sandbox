@@ -1,10 +1,11 @@
 # 🌌 Neural Particle Sandbox 3D
 
-A high-performance, interactive 3D particle simulation that bridges the gap between Computer Vision and WebGL. Control a swarm of 8,000+ particles and physical 3D objects using real-time hand gestures tracked via your webcam.
+A high-performance, interactive 3D particle simulation that bridges the gap between Computer Vision, WebGL, and Spatial Audio Synthesis. Control an adaptive swarm of thousands of particles, interact with responsive UI overlays, and manipulate geometric arrays using real-time hand tracking.
 
 ![License](https://img.shields.io/badge/license-MIT-blue.svg)
 ![Three.js](https://img.shields.io/badge/Three.js-r160-black)
 ![MediaPipe](https://img.shields.io/badge/MediaPipe-Hands-green)
+![Web Audio API](https://img.shields.io/badge/Web_Audio_API-Active-orange)
 
 ---
 
@@ -15,26 +16,29 @@ A high-performance, interactive 3D particle simulation that bridges the gap betw
 
 ## 🌟 Key Features
 
-### 🖐️ Neural Hand Tracking
-Leverages **MediaPipe Hands** to track 21 3D landmarks. The system recognizes complex gestures like pinches and open-palm tension to manipulate the virtual environment without a mouse or keyboard.
+### 🖐️ Neural Hand Tracking & Inertial Physics
+Leverages **MediaPipe Hands** to map 21 3D tracking landmarks with a lightweight processing footprint. 
+- **1:1 Precision Rotation:** Features vector-calibrated tracking loops ($Modulus\ \pi$) for smooth, jitter-free wrist rotation tracking on the Z-axis.
+- **Damped Positional Easing:** Custom linear interpolations ($lerp$) mimic physical weight and momentum when grabbing or dragging the particle core.
 
-### 🧊 Real-time Physics Engine
-- **Momentum-based Interaction:** "Grab" 3D primitives and flick your wrist to throw them across the void.
-- **Dynamic Friction & Bounds:** Objects bounce off invisible boundaries with realistic energy loss (damping).
-- **Hysteresis Smoothing:** Anti-jitter logic ensures smooth object grabbing even with low-light camera feeds.
+### 🔊 Generative Web Audio API Synth Engine
+Integrates real-time, cross-browser interactive audio synthesis.
+- **Dynamic Frequency Modulation:** Spreading your palm open scales up the geometric expansion while raising the tone's pitch dynamically between $90\text{ Hz}$ and $280\text{ Hz}$.
+- **Kinetic Gain Scaling:** Fast hand motions increase oscillator volume intensity safely, dropping back down to a faint ambient background hum when your hand remains static.
 
-### 🌀 Particle Morphing
-- **Geometric Templates:** Seamlessly morph between a Heart, Saturn, Flower, Buddha, and Firework shells.
-- **Organic Motion:** Particles utilize trigonometric offsets to simulate a "living" swarm effect even when stationary.
+### 🌀 Advanced Core Geometry Morphology
+- **12 Dynamic Math Models:** Morph seamlessly between a Sphere, Heart, Torus Ring, DNA Double Helix, Trefoil Knot, Cyber Pyramid, Infinity Ribbon, Cosmic Cylinder, Hyper Hourglass, Grid Matrix, Mobius Strip, and a Cosmic Cube.
+- **Velocity-Mapped Trails:** Rapid hand translations alter the point-material matrices, expanding the physical radius of individual vertices to produce trailing cloud embers.
+- **Holographic Protection Shield:** Features an independent Icosahedron Wireframe mesh bound to active scaling variables that deploys on boot to surround the core structure.
 
 ---
 
 ## 🛠️ Tech Stack
 
-- **Core Engine:** [Three.js](https://threejs.org/) (WebGL)
-- **AI/ML:** [Google MediaPipe](https://google.github.io/mediapipe/)
-- **Frontend:** HTML5, CSS3 (Glassmorphism UI), JavaScript ES6 Modules
-- **Math:** Vector Calculus for particle displacement and easing functions.
+- **3D Graphics Engine:** [Three.js](https://threejs.org/) (WebGL 2.0 Acceleration)
+- **Computer Vision API:** [Google MediaPipe Hands](https://google.github.io/mediapipe/)
+- **Audio Engine:** Native Browser Web Audio API (Triangle Wave Oscillators & Damped Gain Nodes)
+- **Frontend Architecture:** Glassmorphic CSS UI Engine featuring scroll track optimizations for low-resolution viewports.
 
 ---
 
@@ -42,26 +46,26 @@ Leverages **MediaPipe Hands** to track 21 3D landmarks. The system recognizes co
 
 ```text
 particle-sandbox/
-├── index.html          # Main entry point & UI layout
-├── README.md           # Documentation
+├── index.html          # Entry point, glassmorphic UI layout & select element dropdown
+├── README.md           # Portfolio documentation
 ├── css/
-│   └── style.css       # Glassmorphism UI & Animations
+│   └── style.css       # Layout rules, mobile media viewports & custom webkit scrollbars
 └── js/
-    ├── main.js         # Scene initialization & Physics loop
-    └── shapes.js       # Mathematical geometric templates
+    ├── main.js         # Loop controller, web audio routing, and tracking interpolation
+    └── shapes.js       # Mathematical algorithms generating vector coordinate data
 
 ```
 
-## 🎮 How to Use
+🎮 How to Use
+Allow Camera Access: Give your browser permission to utilize your webcam. All computing and vision calculations are executed entirely locally on your device's hardware.
 
-- Allow Camera Access: The app requires your webcam to track hand movements (all processing is done locally on your device).
--
-- Pinch to Grab: Bring your index finger and thumb together near a floating wireframe object to "pick it up."
+Pinch to Grab: Bring your index finger and thumb together near the core to anchor your position coordinates and drag the object.
 
-- Throw: Move your hand quickly and release the pinch to apply momentum.
+Rotate Hand: Tilt your hand side-to-side to roll the geometry smoothly on its rotational axis.
 
-- Switch Shapes: Use the sidebar menu to morph the particle cloud into different mathematical structures.
+Expand Palm: Spread your fingers apart to blow out particle clusters, scale up the hologram shield, and modulate synth engine frequencies.
 
+Interactive Sidebar Panel: Use the glassmorphism control hub to trigger audio toggles, swap between 12 mathematical layout styles, or change the active vector color profile.
 ---
 
 ## 🔧 Installation & Local Development
@@ -84,6 +88,6 @@ Distributed under the MIT License. See `LICENSE` for more information.
 ---
 
 **Developed by Monish M**  
-*Creative technologist exploring the intersection of AI and 3D graphics.*
+*Creative technologist exploring the intersection of AI, Web Audio Synthesis, and 3D graphics.*
 
 ---
