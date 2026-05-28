@@ -1,113 +1,147 @@
-import * as THREE from 'three';
-
 /**
- * Utility to shuffle arrays for more organic particle transitions
+ * Holographic Coordinate Matrix Generator - Extended Portfolio Edition
+ * Generates algorithmic layout data matching requested vertex allocations dynamically.
  */
-function shuffle(array) {
-    for (let i = array.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [array[i], array[j]] = [array[j], array[i]];
+export function getShapeData(type, count) {
+    const points = [];
+
+    for (let i = 0; i < count; i++) {
+        if (type === 'sphere') {
+            const u = Math.random();
+            const v = Math.random();
+            const theta = u * 2.0 * Math.PI;
+            const phi = Math.acos(2.0 * v - 1.0);
+            const radius = 6; 
+            points.push({
+                x: radius * Math.sin(phi) * Math.cos(theta),
+                y: radius * Math.sin(phi) * Math.sin(theta),
+                z: radius * Math.cos(phi)
+            });
+
+        } else if (type === 'heart') {
+            const t = (i / count) * Math.PI * 2;
+            const baseX = 16 * Math.pow(Math.sin(t), 3) * 0.35;
+            const baseY = (13 * Math.cos(t) - 5 * Math.cos(2 * t) - 2 * Math.cos(3 * t) - Math.cos(4 * t)) * 0.35;
+            const baseZ = (Math.random() - 0.5) * 1.5; 
+            points.push({ x: baseX, y: baseY, z: baseZ });
+
+        // --- NEW SHAPE 1: Torus (Donut Ring) ---
+        } else if (type === 'torus') {
+            const u = Math.random() * Math.PI * 2;
+            const v = Math.random() * Math.PI * 2;
+            const R = 6.5; // Major radius
+            const r = 2.0; // Minor radius
+            points.push({
+                x: (R + r * Math.cos(v)) * Math.cos(u),
+                y: (R + r * Math.cos(v)) * Math.sin(u),
+                z: r * Math.sin(v)
+            });
+
+        // --- NEW SHAPE 2: DNA Double Helix ---
+        } else if (type === 'helix') {
+            const pct = i / count;
+            const turns = 4 * Math.PI * 2;
+            const angle = pct * turns;
+            const radius = 4;
+            const height = 14;
+            const isStrandB = i % 2 === 0;
+            const strandAngle = angle + (isStrandB ? Math.PI : 0);
+            points.push({
+                x: radius * Math.cos(strandAngle),
+                y: (pct * height) - (height / 2),
+                z: radius * Math.sin(strandAngle)
+            });
+
+        // --- NEW SHAPE 3: Infinitely Looping Trefoil Knot ---
+        } else if (type === 'trefoil') {
+            const t = (i / count) * Math.PI * 2 * 3; 
+            points.push({
+                x: (Math.sin(t) + 2 * Math.sin(2 * t)) * 2,
+                y: (Math.cos(t) - 2 * Math.cos(2 * t)) * 2,
+                z: -Math.sin(3 * t) * 2
+            });
+
+        // --- NEW SHAPE 4: Cyber Pyramid (Square Base) ---
+        } else if (type === 'pyramid') {
+            const h = Math.random() * 8 - 4; // Height level
+            const pct = (h + 4) / 8; // 0 at base, 1 at apex
+            const baseWidth = (1 - pct) * 6; // Shrinks to point at top
+            const edge = i % 4;
+            let rx = 0, rz = 0;
+            if (edge === 0) { rx = baseWidth; rz = (Math.random() * 2 - 1) * baseWidth; }
+            else if (edge === 1) { rx = -baseWidth; rz = (Math.random() * 2 - 1) * baseWidth; }
+            else if (edge === 2) { rz = baseWidth; rx = (Math.random() * 2 - 1) * baseWidth; }
+            else { rz = -baseWidth; rx = (Math.random() * 2 - 1) * baseWidth; }
+            points.push({ x: rx, y: h + 1, z: rz });
+
+        // --- NEW SHAPE 5: Mathematical Infinity Ribbon (Lemniscate) ---
+        } else if (type === 'infinity') {
+            const t = (i / count) * Math.PI * 2;
+            const scale = 8 / (3 - Math.cos(2 * t));
+            points.push({
+                x: scale * Math.cos(t),
+                y: scale * Math.sin(2 * t) / 2,
+                z: (Math.random() - 0.5) * 1.5
+            });
+
+        // --- NEW SHAPE 6: Cosmic Cylinder ---
+        } else if (type === 'cylinder') {
+            const angle = Math.random() * Math.PI * 2;
+            const radius = 5;
+            points.push({
+                x: radius * Math.cos(angle),
+                y: Math.random() * 12 - 6,
+                z: radius * Math.sin(angle)
+            });
+
+        // --- NEW SHAPE 7: Hyperbolic Hourglass (Hyperboloid) ---
+        } else if (type === 'hourglass') {
+            const y = Math.random() * 10 - 5;
+            const radius = 2.5 * Math.sqrt(1 + (y * y) / 9);
+            const angle = Math.random() * Math.PI * 2;
+            points.push({
+                x: radius * Math.cos(angle),
+                y: y,
+                z: radius * Math.sin(angle)
+            });
+
+        // --- NEW SHAPE 8: Flat Data Matrix Mesh Grid ---
+        } else if (type === 'grid') {
+            const size = Math.sqrt(count);
+            const col = i % size;
+            const row = Math.floor(i / size);
+            points.push({
+                x: ((col / size) * 14) - 7,
+                y: ((row / size) * 14) - 7,
+                z: 0
+            });
+
+        // --- NEW SHAPE 9: Mobius Strip Loop ---
+        } else if (type === 'mobius') {
+            const u = (i / count) * Math.PI * 2;
+            const v = Math.random() * 2 - 1; // Width factor
+            const rad = 6;
+            points.push({
+                x: (rad + v * 0.5 * Math.cos(u / 2)) * Math.cos(u),
+                y: (rad + v * 0.5 * Math.cos(u / 2)) * Math.sin(u),
+                z: v * 0.5 * Math.sin(u / 2)
+            });
+
+        // --- NEW SHAPE 10: Cosmic Cube Frame ---
+        } else if (type === 'cube') {
+            const side = i % 3;
+            let cx = Math.random() * 8 - 4;
+            let cy = Math.random() * 8 - 4;
+            let cz = Math.random() * 8 - 4;
+            if (side === 0) cx = Math.random() > 0.5 ? 4 : -4;
+            else if (side === 1) cy = Math.random() > 0.5 ? 4 : -4;
+            else cz = Math.random() > 0.5 ? 4 : -4;
+            points.push({ x: cx, y: cy, z: cz });
+
+        } else {
+            points.push({ x: 0, y: 0, z: 0 });
+        }
     }
-}
 
-/**
- * Main function to generate point data based on shape type
- * @param {string} type - The shape ID from the UI
- * @param {number} N - Number of particles
- */
-export function getShapeData(type, N) {
-    let positions = [];
-
-    switch (type) {
-        case 'heart':
-            while (positions.length < N) {
-                let x = (Math.random() - 0.5) * 3;
-                let y = (Math.random() - 0.5) * 3;
-                let z = (Math.random() - 0.5) * 3;
-                // Heart Equation: (x^2 + 9/4y^2 + z^2 - 1)^3 - x^2z^3 - 9/80y^2z^3 <= 0
-                let eq = Math.pow(x * x + 2.25 * y * y + z * z - 1, 3) - x * x * z * z * z - 0.1125 * y * y * z * z * z;
-                if (eq <= 0) {
-                    positions.push(new THREE.Vector3(x * 6, z * 6, y * 6));
-                }
-            }
-            break;
-
-        case 'flower':
-            for (let i = 0; i < N; i++) {
-                let angle = Math.random() * Math.PI * 2;
-                let radius = 8 * Math.abs(Math.sin(angle * 2.5));
-                let t = Math.random();
-                let final_r = radius * Math.sqrt(t);
-                let x = final_r * Math.cos(angle);
-                let y = final_r * Math.sin(angle);
-                let z = (Math.random() - 0.5) * 1.5;
-                positions.push(new THREE.Vector3(x, z, -y));
-            }
-            break;
-
-        case 'saturn':
-            for (let i = 0; i < N; i++) {
-                if (Math.random() < 0.25) { // Planet Core
-                    let u = Math.random() * 2 * Math.PI;
-                    let v = Math.acos(2 * Math.random() - 1);
-                    let r = 4.5 * Math.cbrt(Math.random());
-                    positions.push(new THREE.Vector3(r * Math.sin(v) * Math.cos(u), r * Math.sin(v) * Math.sin(u), r * Math.cos(v)));
-                } else { // Rings
-                    let angle = Math.random() * Math.PI * 2;
-                    let r = 6.0 + Math.random() * 5.0;
-                    let x = r * Math.cos(angle);
-                    let z = r * Math.sin(angle);
-                    let y = (Math.random() - 0.5) * 0.4;
-                    let tilt = Math.PI / 8;
-                    positions.push(new THREE.Vector3(x, y * Math.cos(tilt) - z * Math.sin(tilt), y * Math.sin(tilt) + z * Math.cos(tilt)));
-                }
-            }
-            break;
-
-        case 'buddha':
-            // Layered composition for a silhouette effect
-            while (positions.length < N) {
-                let u = Math.random() * 2 * Math.PI;
-                let v = Math.acos(2 * Math.random() - 1);
-                let r = Math.cbrt(Math.random());
-                let x, y, z;
-                if (positions.length < N * 0.1) { // Head
-                    x = r * Math.sin(v) * Math.cos(u) * 1.5;
-                    y = (r * Math.sin(v) * Math.sin(u) + 4.5);
-                    z = r * Math.cos(v) * 1.5;
-                } else if (positions.length < N * 0.6) { // Torso
-                    x = r * Math.sin(v) * Math.cos(u) * 3.5;
-                    y = (r * Math.sin(v) * Math.sin(u) * 4.5);
-                    z = r * Math.cos(v) * 2;
-                } else { // Base
-                    x = r * Math.sin(v) * Math.cos(u) * 5.5;
-                    y = (r * Math.sin(v) * Math.sin(u) * 1.5 - 4);
-                    z = r * Math.cos(v) * 4;
-                }
-                positions.push(new THREE.Vector3(x, y, z));
-            }
-            break;
-
-        case 'firework':
-            const shells = [3, 6, 9, 12];
-            for (let i = 0; i < N; i++) {
-                let u = Math.random() * 2 * Math.PI;
-                let v = Math.acos(2 * Math.random() - 1);
-                let baseR = shells[Math.floor(Math.random() * shells.length)];
-                let r = baseR + (Math.random() - 0.5) * 0.5;
-                positions.push(new THREE.Vector3(r * Math.sin(v) * Math.cos(u), r * Math.sin(v) * Math.sin(u), r * Math.cos(v)));
-            }
-            break;
-
-        default: // Sphere fallback
-            for (let i = 0; i < N; i++) {
-                let u = Math.random() * 2 * Math.PI;
-                let v = Math.acos(2 * Math.random() - 1);
-                let r = 10;
-                positions.push(new THREE.Vector3(r * Math.sin(v) * Math.cos(u), r * Math.sin(v) * Math.sin(u), r * Math.cos(v)));
-            }
-    }
-
-    shuffle(positions);
-    return positions;
+    return points;
 }

@@ -19,7 +19,7 @@ body {
     color: #fff; 
 }
 
-/* --- UI Panel (Glassmorphism - Moved to Right) --- */
+/* --- UI Panel (Glassmorphism + Scroll Management) --- */
 #ui-panel {
     position: absolute; 
     top: 24px; 
@@ -27,14 +27,34 @@ body {
     background: var(--panel-bg);
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
-    border: 1px solid var(--border-glow);
+    border: 1px solid rgba(255, 255, 255, 0.05);
     border-radius: 20px; 
     padding: 24px; 
+    padding-right: 8px; /* Buffer space for the custom scrollbar element */
     width: 280px;
+    max-height: 85vh; /* Prevents panel from expanding past the viewport boundary */
+    overflow-y: auto; /* Enables smooth vertical scrolling when content leaks */
+    overflow-x: hidden;
     box-shadow: 0 10px 40px rgba(0,0,0,0.6);
     z-index: 100;
     transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.5s ease;
-    border: 1px solid rgba(255, 255, 255, 0.05);
+    -webkit-overflow-scrolling: touch; /* Smooth iOS kinetic scrolling behavior */
+}
+
+/* Custom Minimalist Dark Scrollbar Design */
+#ui-panel::-webkit-scrollbar {
+    width: 4px;
+}
+#ui-panel::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.01);
+    border-radius: 10px;
+}
+#ui-panel::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.15);
+    border-radius: 10px;
+}
+#ui-panel::-webkit-scrollbar-thumb:hover {
+    background: var(--accent, #ff007f); /* Flashes active color on interaction hover */
 }
 
 header { 
@@ -42,6 +62,7 @@ header {
     justify-content: space-between; 
     align-items: center; 
     margin-bottom: 24px; 
+    padding-right: 12px; /* Offsets scrollbar layout overlap */
 }
 
 h3 { 
@@ -60,11 +81,65 @@ h3 {
     font-weight: 800; 
     text-transform: uppercase;
     transition: background 0.3s ease;
-    animation: pulse-glow 2s infinite alternate;
+}
+
+/* --- Telemetry Dashboard --- */
+.telemetry-dashboard {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 8px;
+    padding: 12px;
+    margin-bottom: 15px;
+    margin-right: 12px;
+}
+.telemetry-dashboard h4 {
+    font-size: 0.65rem;
+    letter-spacing: 0.1em;
+    color: #888;
+    margin: 0 0 8px 0;
+}
+.telemetry-grid {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 8px;
+}
+.stat-block {
+    flex: 1;
+    background: rgba(0, 0, 0, 0.2);
+    padding: 6px;
+    border-radius: 4px;
+    border-left: 2px solid var(--accent, #ff007f);
+}
+.stat-block small {
+    display: block;
+    font-size: 0.55rem;
+    color: #aaa;
+}
+.stat-block span {
+    font-family: monospace;
+    font-size: 0.9rem;
+    font-weight: bold;
+}
+.sensor-status {
+    font-size: 0.65rem;
+    color: #66bb6a;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+.status-dot-active {
+    width: 6px;
+    height: 6px;
+    background: #66bb6a;
+    border-radius: 50%;
+    box-shadow: 0 0 8px #66bb6a;
 }
 
 /* --- Control Groups --- */
-.control-group { margin-bottom: 20px; }
+.control-group { 
+    margin-bottom: 20px; 
+    padding-right: 12px;
+}
 
 label { 
     display: block; 
@@ -84,7 +159,6 @@ button {
     padding: 12px; 
     border-radius: 10px; 
     cursor: pointer; 
-    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); 
     font-size: 0.85rem;
     font-family: inherit;
     margin-bottom: 8px;
@@ -126,6 +200,7 @@ input[type="color"]::-webkit-color-swatch {
     padding: 16px; 
     border-radius: 14px;
     border-left: 3px solid var(--accent);
+    margin-right: 12px;
 }
 
 .hint-box p { margin: 6px 0; }
@@ -147,10 +222,13 @@ input[type="color"]::-webkit-color-swatch {
 
 #webcam, #output_canvas { 
     position: absolute; 
-    transform: scaleX(-1); /* Mirror effect */
+    top: 0;
+    left: 0;
     width: 100%; 
     height: 100%; 
     object-fit: cover; 
+    transform: scaleX(-1); 
+    -webkit-transform: scaleX(-1);
 }
 
 /* --- Loading Screen & Spinner --- */
@@ -188,8 +266,7 @@ canvas {
     height: 100vh;
 }
 
-
-
+/* --- Responsive Media Viewports --- */
 @media (max-width: 768px) {
     #ui-panel {
         top: auto;
@@ -199,6 +276,7 @@ canvas {
         width: calc(100% - 20px);
         padding: 15px;
         border-radius: 15px;
+        max-height: 50vh;
     }
     #webcam-container {
         top: 10px;
@@ -208,9 +286,8 @@ canvas {
         border-width: 1px;
     }
 
-    /* Hide instructions on mobile to save space */
     .hint-box {
-        display: none;
+        display: none; /* Safe-guard vertical viewport space on mobile devices */
     }
 
     header {
@@ -222,10 +299,11 @@ canvas {
         display: flex;
         gap: 10px;
         align-items: center;
+        padding-right: 0;
     }
 
     .control-group label {
-        display: none; /* Save vertical space */
+        display: none; 
     }
 
     button {

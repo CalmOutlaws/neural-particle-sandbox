@@ -3,23 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Neural Particle Sandbox | 3D Interactive Experience</title>
+    <title>Neural Particle Sandbox | 3D Core Experience</title>
     
-    <meta name="description" content="A real-time 3D particle system controlled by complex hand gestures.">
+    <meta name="description" content="A real-time 3D interactive core controlled by neural hand gestures.">
     <meta name="author" content="Monish M">
 
-    <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
     
-    <!-- Stylesheets -->
     <link rel="stylesheet" href="css/style.css">
 
-    <!-- MediaPipe Core Libraries -->
     <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js" crossorigin="anonymous"></script>
     
-    <!-- Import Map for Modern Three.js handling -->
     <script type="importmap">
     {
       "imports": {
@@ -31,48 +27,79 @@
 </head>
 <body>
 
-    <!-- Loading Overlay -->
     <div id="loading">
         <div class="spinner"></div>
         <p>Calibrating Neural Sensors...</p>
     </div>
     
-    <!-- Webcam Radar -->
     <div id="webcam-container">
         <video id="webcam" autoplay playsinline></video>
-        <canvas id="output_canvas" width="640" height="480"></canvas>
+        <canvas id="output_canvas"></canvas>
     </div>
 
-    <!-- Control Panel -->
     <div id="ui-panel">
-        <header>
-            <h3>Neural Sandbox</h3>
-            <span class="badge">v3.0 Ultra</span>
-        </header>
+    <header>
+        <h3>Neural Sandbox</h3>
+        <span class="badge" id="fps-counter">60 FPS</span>
+    </header>
 
-        <div class="control-group">
-            <label>Morph Geometry</label>
-            <button id="shapeSphere">Sphere Mode</button>
-            <button id="shapeHeart">Heart Mode</button>
+    <div class="telemetry-dashboard">
+        <h4>ENGINE TELEMETRY</h4>
+        <div class="telemetry-grid">
+            <div class="stat-block"><small>Vertex Load</small><span id="stat-vertices">4,000</span></div>
+            <div class="stat-block"><small>Kinetic Velocity</small><span id="stat-velocity">0.00</span></div>
         </div>
-
-        <div class="control-group">
-            <label>Neural Color</label>
-            <input type="color" id="colorPicker" value="#ff007f">
+        <div class="telemetry-grid" style="margin-top: 8px;">
+            <div class="stat-block" style="border-left-color: #4fc3f7;"><small>Synth Engine</small><span id="stat-audio">MUTED</span></div>
         </div>
-
-        <div class="control-group">
-            <button id="resetBtn">Reset Transformation</button>
-        </div>
-
-        <div class="hint-box">
-            <p><strong>• Rotate Palm:</strong> Tilt the central object.</p>
-            <p><strong>• Dual Pinch:</strong> Grab with both hands.</p>
-            <p><strong>• Expand Hand:</strong> Burst the particles.</p>
-        </div>
+        <div class="sensor-status"><span class="status-dot-active"></span> Neural Engine: Operational</div>
     </div>
 
-    <!-- Main Logic Entry -->
+    <div class="control-group">
+        <label>Neural Audio Synthesis</label>
+        <button id="audioToggleBtn" style="background: #2e2e2e; border: 1px solid #444;">Enable Audio Engine</button>
+    </div>
+
+    <div class="control-group">
+        <label>Matrix Modifiers</label>
+        <button id="shieldToggleBtn" style="background: #2e2e2e; border: 1px solid #444;">Deploy Hologram Shield</button>
+    </div>
+
+    <div class="control-group">
+    <label>Morph Matrix core</label>
+    <select id="shapeSelector" style="width:100%; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.08); color:white; padding:12px; border-radius:10px; cursor:pointer; font-family:inherit; outline:none; margin-bottom:8px;">
+        <option value="sphere" style="background:#0c0f12;">Sphere Engine</option>
+        <option value="heart" style="background:#0c0f12;">Heart Core</option>
+        <option value="torus" style="background:#0c0f12;">Torus Ring</option>
+        <option value="helix" style="background:#0c0f12;">Double Helix</option>
+        <option value="trefoil" style="background:#0c0f12;">Trefoil Knot</option>
+        <option value="pyramid" style="background:#0c0f12;">Cyber Pyramid</option>
+        <option value="infinity" style="background:#0c0f12;">Infinity Ribbon</option>
+        <option value="cylinder" style="background:#0c0f12;">Cosmic Cylinder</option>
+        <option value="hourglass" style="background:#0c0f12;">Hyper Hourglass</option>
+        <option value="grid" style="background:#0c0f12;">Data Matrix Grid</option>
+        <option value="mobius" style="background:#0c0f12;">Mobius Strip</option>
+        <option value="cube" style="background:#0c0f12;">Cosmic Cube</option>
+    </select>
+</div>
+
+    <div class="control-group">
+        <label>Neural Color</label>
+        <input type="color" id="colorPicker" value="#ff007f">
+    </div>
+
+    <div class="control-group">
+        <button id="resetBtn">Center Object</button>
+    </div>
+
+    <div class="hint-box">
+        <h4>INTERFACE MANUAL</h4>
+        <p><strong>• Pinch Fingers:</strong> Grab and drag the core smoothly.</p>
+        <p><strong>• Rotate Hand:</strong> Tilt your hand to spin the object precisely on its Z-axis.</p>
+        <p><strong>• Expand Palm:</strong> Spread fingers to expand particle clusters and shields.</p>
+    </div>
+</div>
+
     <script type="module" src="js/main.js"></script>
 
 </body>
