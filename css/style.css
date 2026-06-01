@@ -136,9 +136,55 @@ h3 {
 }
 
 /* --- Control Groups --- */
-.control-group { 
-    margin-bottom: 20px; 
+.control-group {
+    margin-bottom: 20px;
     padding-right: 12px;
+}
+
+/* New button styles for enhanced UI */
+#recordBtn, #playbackBtn, #exportBtn, #physicsToggleBtn {
+    width: 100%;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid var(--border-glow);
+    color: #fff;
+    padding: 12px;
+    border-radius: 10px;
+    cursor: pointer;
+    font-size: 0.85rem;
+    font-family: inherit;
+    margin-bottom: 8px;
+    transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1); /* Smoother button feel */
+}
+
+#recordBtn:hover, #playbackBtn:hover, #exportBtn:hover, #physicsToggleBtn:hover {
+    background: rgba(255,255,255,0.12);
+    border-color: rgba(255,255,255,0.3);
+    transform: translateY(-2px);
+}
+
+/* Performance select styling */
+#performanceSelect {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid var(--border-glow);
+    border-radius: 10px;
+    background: rgba(255,255,255,0.05);
+    color: white;
+    font-family: inherit;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+#performanceSelect:hover {
+    border-color: var(--accent);
+    background: rgba(255,255,255,0.08);
+}
+
+#performanceSelect:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 2px rgba(255, 0, 127, 0.3);
 }
 
 label { 

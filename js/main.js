@@ -1,15 +1,16 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import * as Shapes from './shapes.js';
+import * as CANNON from 'cannon-es';
 
 /** * DEVICE OPTIMIZATION, SMOOTHING & AUDIO STATE */
 const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-const vertexCount = isMobile ? 1500 : 4000; 
+let vertexCount = isMobile ? 1500 : 4000; // Changed to let to allow performance mode reassignment
 
-const posSmoothing = 0.08; 
-const rotSmoothing = 0.05; 
+const posSmoothing = 0.08;
+const rotSmoothing = 0.05;
 
-let activeColor = "#ff007f"; 
+let activeColor = "#ff007f";
 let targetTension = 1.0;
 let currentTension = 1.0;
 
@@ -21,13 +22,25 @@ let targetZRotation = 0;
 
 // Interactive Matrix Elements - BOOT ACTIVE BY DEFAULT
 let shieldMesh = null;
-let shieldActive = true; 
+let shieldActive = true;
 
 // Web Audio API Elements
 let audioCtx = null;
 let oscillator = null;
 let gainNode = null;
 let audioEnabled = false;
+
+// Physics Engine Elements
+let physicsWorld = null;
+let physicsBodies = [];
+let physicsEnabled = false;
+
+// Gesture Recording & Playback States
+let isRecording = false;
+let recordedGestures = [];
+let playbackIndex = 0;
+let isPlayingBack = false;
+let playbackStartTime = null; // FIXED: Defined globally to prevent runtime reference errors
 
 // Performance Telemetry
 let lastTime = performance.now();
@@ -49,10 +62,10 @@ controls.enableDamping = true;
 controls.dampingFactor = 0.05;
 
 // --- 2. Single Core Particle Engine ---
-const coreGeo = new THREE.BufferGeometry();
-const positions = new Float32Array(vertexCount * 3);
-const currentBase = new Float32Array(vertexCount * 3);
-const targetBase = new Float32Array(vertexCount * 3);
+let coreGeo = new THREE.BufferGeometry();
+let positions = new Float32Array(vertexCount * 3);
+let currentBase = new Float32Array(vertexCount * 3);
+let targetBase = new Float32Array(vertexCount * 3);
 coreGeo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
 
 const defaultPointSize = isMobile ? 0.35 : 0.22;
@@ -70,16 +83,20 @@ scene.add(centralObject);
 function setTargetShape(name) {
     const data = Shapes.getShapeData(name, vertexCount);
     for(let i = 0; i < vertexCount; i++) {
-        targetBase[i * 3]     = data[i].x;
-        targetBase[i * 3 + 1] = data[i].y;
-        targetBase[i * 3 + 2] = data[i].z;
+        if (data[i]) {
+            targetBase[i * 3]     = data[i].x;
+            targetBase[i * 3 + 1] = data[i].y;
+            targetBase[i * 3 + 2] = data[i].z;
+        }
     }
-    document.getElementById('stat-vertices').innerText = vertexCount.toLocaleString();
+    const statElement = document.getElementById('stat-vertices');
+    if (statElement) statElement.innerText = vertexCount.toLocaleString();
 }
 setTargetShape('sphere');
 
 // --- 3. Holo Wireframe Shield (Constructed Active on Initialization) ---
 function createShieldMesh() {
+    if (shieldMesh) scene.remove(shieldMesh);
     const shieldGeo = new THREE.IcosahedronGeometry(6.5, isMobile ? 1 : 2);
     const shieldMat = new THREE.MeshBasicMaterial({
         color: activeColor,
@@ -91,7 +108,7 @@ function createShieldMesh() {
     shieldMesh = new THREE.Mesh(shieldGeo, shieldMat);
     scene.add(shieldMesh);
 }
-createShieldMesh(); // Instantiate immediately on runtime boot
+createShieldMesh(); 
 
 // --- 4. Web Audio Initializer ---
 function initAudioEngine() {
@@ -99,14 +116,78 @@ function initAudioEngine() {
     audioCtx = new (window.AudioContext || window.webkitAudioContext)();
     oscillator = audioCtx.createOscillator();
     gainNode = audioCtx.createGain();
-    
-    oscillator.type = 'triangle'; 
-    oscillator.frequency.setValueAtTime(110, audioCtx.currentTime); 
-    gainNode.gain.setValueAtTime(0, audioCtx.currentTime); 
-    
+
+    oscillator.type = 'triangle';
+    oscillator.frequency.setValueAtTime(110, audioCtx.currentTime);
+    gainNode.gain.setValueAtTime(0, audioCtx.currentTime);
+
     oscillator.connect(gainNode);
     gainNode.connect(audioCtx.destination);
     oscillator.start();
+}
+
+// --- 4b. Physics Engine Initializer ---
+function initPhysicsEngine() {
+    if (physicsWorld) return;
+
+    physicsWorld = new CANNON.World({
+        gravity: new CANNON.Vec3(0, -9.82, 0),
+        broadphase: new CANNON.NaiveBroadphase(),
+        solver: new CANNON.GSSolver()
+    });
+
+    physicsWorld.defaultContactMaterial.friction = 0.1;
+    physicsWorld.defaultContactMaterial.restitution = 0.3;
+
+    const groundBody = new CANNON.Body({
+        mass: 0,
+        shape: new CANNON.Plane()
+    });
+    groundBody.quaternion.setFromEuler(-Math.PI/2, 0, 0);
+    physicsWorld.addBody(groundBody);
+
+    const particleRadius = 0.1;
+    const particleMass = 0.01;
+
+    physicsBodies = [];
+    for (let i = 0; i < Math.min(vertexCount, 500); i++) {
+        const sphereBody = new CANNON.Body({
+            mass: particleMass,
+            shape: new CANNON.Sphere(particleRadius),
+            position: new CANNON.Vec3(
+                (Math.random() - 0.5) * 10,
+                5 + Math.random() * 10,
+                (Math.random() - 0.5) * 10
+            ),
+            velocity: new CANNON.Vec3(
+                (Math.random() - 0.5) * 2,
+                (Math.random() - 0.5) * 2,
+                (Math.random() - 0.5) * 2
+            )
+        });
+        physicsWorld.addBody(sphereBody);
+        physicsBodies.push(sphereBody);
+    }
+}
+
+// --- 4c. Core Geometry Recreator ---
+function recreateCoreGeometry() {
+    centralObject.geometry.dispose();
+
+    coreGeo = new THREE.BufferGeometry();
+    positions = new Float32Array(vertexCount * 3);
+    currentBase = new Float32Array(vertexCount * 3);
+    targetBase = new Float32Array(vertexCount * 3);
+    coreGeo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+
+    centralObject.geometry = coreGeo;
+
+    for(let i = 0; i < vertexCount * 3; i++) {
+        currentBase[i] = 0;
+        targetBase[i] = 0;
+    }
+
+    setTargetShape(document.getElementById('shapeSelector').value);
 }
 
 // --- 5. Hand Tracking Subsystems ---
@@ -126,7 +207,8 @@ hands.setOptions({
 });
 
 hands.onResults((results) => {
-    document.getElementById('loading').style.display = 'none';
+    const loader = document.getElementById('loading');
+    if (loader) loader.style.display = 'none';
 
     if (canvasElement.width !== video.videoWidth || canvasElement.height !== video.videoHeight) {
         canvasElement.width = video.videoWidth;
@@ -178,12 +260,14 @@ hands.onResults((results) => {
             }
         });
     } else {
-        controls.enabled = true;
-        targetTension = 1.0; 
-        handVelocity = THREE.MathUtils.lerp(handVelocity, 0, 0.05);
-        if (audioEnabled && audioCtx) {
-            gainNode.gain.setTargetAtTime(0.02, audioCtx.currentTime, 0.2); 
-            document.getElementById('stat-audio').innerText = "IDLE HUM";
+        if (!isPlayingBack) {
+            controls.enabled = true;
+            targetTension = 1.0; 
+            handVelocity = THREE.MathUtils.lerp(handVelocity, 0, 0.05);
+            if (audioEnabled && audioCtx) {
+                gainNode.gain.setTargetAtTime(0.02, audioCtx.currentTime, 0.2); 
+                document.getElementById('stat-audio').innerText = "IDLE HUM";
+            }
         }
     }
     canvasCtx.restore();
@@ -196,12 +280,13 @@ const cameraUtils = new window.Camera(video, {
 });
 cameraUtils.start();
 
-// --- 6. Render Loop Engine ---
+// --- 6. Clean Render Loop Engine (FIXED: Duplications Removed) ---
 function animate() {
     requestAnimationFrame(animate);
     const time = performance.now() * 0.001;
     const pArr = coreGeo.attributes.position.array;
 
+    // Telemetry and FPS Calculations
     frameCount++;
     if (performance.now() >= lastTime + 1000) {
         fps = Math.round((frameCount * 1000) / (performance.now() - lastTime));
@@ -211,27 +296,71 @@ function animate() {
     }
     document.getElementById('stat-velocity').innerText = handVelocity.toFixed(2);
 
-    centralObject.position.lerp(targetPosition, posSmoothing);
-    
-    let diff = targetZRotation - centralObject.rotation.z;
-    diff = Math.atan2(Math.sin(diff), Math.cos(diff)); 
-    centralObject.rotation.z += diff * rotSmoothing;
-
-    currentTension = THREE.MathUtils.lerp(currentTension, targetTension, 0.06);
-
-    const targetPointSize = defaultPointSize + (handVelocity * 0.04);
-    coreMat.size = THREE.MathUtils.lerp(coreMat.size, targetPointSize, 0.1);
-
-    const dynamicWaveRipple = 0.10 + (handVelocity * 0.04);
-    const waveFrequency = 0.2 + (handVelocity * 0.06);
-
-    for(let i = 0; i < vertexCount * 3; i++) {
-        currentBase[i] += (targetBase[i] - currentBase[i]) * 0.08;
-        pArr[i] = (currentBase[i] * currentTension) + Math.sin(time * waveFrequency + i * 0.4) * dynamicWaveRipple;
+    // Track gesture recording pipelines
+    if (isRecording) {
+        recordedGestures.push({
+            position: targetPosition.clone(),
+            rotation: targetZRotation,
+            tension: targetTension,
+            handVelocity: handVelocity
+        });
+        if (recordedGestures.length > 1000) recordedGestures.shift();
     }
-    coreGeo.attributes.position.needsUpdate = true;
 
-    // Independent ambient idle adjustments
+    // Playback loop controller tracking variables
+    if (isPlayingBack && recordedGestures.length > 0) {
+        const now = performance.now();
+        if (!playbackStartTime) playbackStartTime = now;
+
+        const elapsed = now - playbackStartTime;
+        const gestureIndex = Math.min(
+            Math.floor((elapsed / 10) % recordedGestures.length),
+            recordedGestures.length - 1
+        );
+
+        const gesture = recordedGestures[gestureIndex];
+        if (gesture) {
+            targetPosition.copy(gesture.position);
+            targetZRotation = gesture.rotation;
+            targetTension = gesture.tension;
+            handVelocity = gesture.handVelocity;
+        }
+    }
+
+    // Physics transformation matrix update pipelines
+    if (physicsEnabled && physicsWorld) {
+        physicsWorld.step(1/60);
+        for (let i = 0; i < Math.min(physicsBodies.length, vertexCount); i++) {
+            const body = physicsBodies[i];
+            pArr[i * 3] = body.position.x;
+            pArr[i * 3 + 1] = body.position.y;
+            pArr[i * 3 + 2] = body.position.z;
+        }
+        coreGeo.attributes.position.needsUpdate = true;
+    } else {
+        // Core Mathematical Form Transition Interpolations
+        centralObject.position.lerp(targetPosition, posSmoothing);
+        
+        let diff = targetZRotation - centralObject.rotation.z;
+        diff = Math.atan2(Math.sin(diff), Math.cos(diff)); 
+        centralObject.rotation.z += diff * rotSmoothing;
+
+        currentTension = THREE.MathUtils.lerp(currentTension, targetTension, 0.06);
+
+        const targetPointSize = defaultPointSize + (handVelocity * 0.04);
+        coreMat.size = THREE.MathUtils.lerp(coreMat.size, targetPointSize, 0.1);
+
+        const dynamicWaveRipple = 0.10 + (handVelocity * 0.04);
+        const waveFrequency = 0.2 + (handVelocity * 0.06);
+
+        for(let i = 0; i < vertexCount * 3; i++) {
+            currentBase[i] += (targetBase[i] - currentBase[i]) * 0.08;
+            pArr[i] = (currentBase[i] * currentTension) + Math.sin(time * waveFrequency + i * 0.4) * dynamicWaveRipple;
+        }
+        coreGeo.attributes.position.needsUpdate = true;
+    }
+
+    // Ambient Idling Rotations
     centralObject.rotation.y += 0.001 + (handVelocity * 0.001);
     centralObject.rotation.x += 0.0005;
     
@@ -242,6 +371,7 @@ function animate() {
         shieldMesh.scale.setScalar(currentTension * 1.4);
     }
 
+    controls.update();
     renderer.render(scene, camera);
 }
 animate();
@@ -256,8 +386,6 @@ document.getElementById('shieldToggleBtn').onclick = (e) => {
     } else {
         if (shieldMesh) {
             scene.remove(shieldMesh);
-            shieldMesh.geometry.dispose();
-            shieldMesh.material.dispose();
             shieldMesh = null;
         }
         e.target.innerText = "Deploy Hologram Shield";
@@ -286,7 +414,8 @@ document.getElementById('colorPicker').addEventListener('input', (e) => {
     activeColor = e.target.value;
     centralObject.material.color.set(activeColor);
     if(shieldMesh) shieldMesh.material.color.set(activeColor);
-    document.querySelector('.badge').style.background = activeColor;
+    const badge = document.querySelector('.badge');
+    if (badge) badge.style.background = activeColor;
 });
 
 document.getElementById('resetBtn').onclick = () => {
@@ -295,7 +424,82 @@ document.getElementById('resetBtn').onclick = () => {
     centralObject.rotation.set(0, 0, 0);
 };
 
-// Select Listener Matrix Hook for Dropdown Node Engine Changes
+document.getElementById('physicsToggleBtn').onclick = (e) => {
+    physicsEnabled = !physicsEnabled;
+    if (physicsEnabled) {
+        initPhysicsEngine();
+        e.target.innerText = "Physics: ON";
+        e.target.style.background = "#ff007f";
+        document.getElementById('stat-physics').innerText = "ACTIVE";
+    } else {
+        physicsEnabled = false;
+        physicsWorld = null; // Kill world reference to pull particles back to base shapes
+        e.target.innerText = "Physics: OFF";
+        e.target.style.background = "#2e2e2e";
+        document.getElementById('stat-physics').innerText = "INACTIVE";
+    }
+};
+
+document.getElementById('recordBtn').onclick = (e) => {
+    isRecording = !isRecording;
+    if (isRecording) {
+        recordedGestures = [];
+        e.target.innerText = "Recording...";
+        e.target.style.background = "#ff007f";
+    } else {
+        e.target.innerText = "Record Gesture";
+        e.target.style.background = "#2e2e2e";
+        alert(`Recorded ${recordedGestures.length} gesture points`);
+    }
+};
+
+document.getElementById('playbackBtn').onclick = (e) => {
+    if (recordedGestures.length === 0) {
+        alert("No gestures recorded yet!");
+        return;
+    }
+    isPlayingBack = !isPlayingBack;
+    if (isPlayingBack) {
+        playbackStartTime = null;
+        e.target.innerText = "Stop Playback";
+        e.target.style.background = "#ff007f";
+    } else {
+        e.target.innerText = "Playback";
+        e.target.style.background = "#2e2e2e";
+    }
+};
+
+document.getElementById('exportBtn').onclick = () => {
+    const data = {
+        settings: {
+            vertexCount: vertexCount,
+            activeColor: activeColor,
+            shieldActive: shieldActive
+        },
+        gestures: recordedGestures
+    };
+
+    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(data));
+    const downloadAnchorNode = document.createElement('a');
+    downloadAnchorNode.setAttribute("href", dataStr);
+    downloadAnchorNode.setAttribute("download", "neural-particle-simulation.json");
+    document.body.appendChild(downloadAnchorNode);
+    downloadAnchorNode.click();
+    downloadAnchorNode.remove();
+};
+
+document.getElementById('performanceSelect').addEventListener('change', (e) => {
+    const mode = e.target.value;
+    switch(mode) {
+        case 'ultra': vertexCount = 8000; break;
+        case 'high':  vertexCount = isMobile ? 1500 : 4000; break;
+        case 'medium': vertexCount = isMobile ? 800 : 2000; break;
+        case 'low':    vertexCount = isMobile ? 400 : 1000; break;
+        case 'mobile': vertexCount = 800; break;
+    }
+    recreateCoreGeometry();
+});
+
 document.getElementById('shapeSelector').addEventListener('change', (e) => {
     setTargetShape(e.target.value);
 });

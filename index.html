@@ -4,23 +4,23 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Neural Particle Sandbox | 3D Core Experience</title>
-    
+
     <meta name="description" content="A real-time 3D interactive core controlled by neural hand gestures.">
     <meta name="author" content="Monish M">
 
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
-    
     <link rel="stylesheet" href="css/style.css">
 
     <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js" crossorigin="anonymous"></script>
-    
+
     <script type="importmap">
     {
       "imports": {
         "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
-        "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+        "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/",
+        "cannon-es": "https://cdn.jsdelivr.net/npm/cannon-es@0.20.0/dist/cannon-es.js"
       }
     }
     </script>
@@ -31,74 +31,108 @@
         <div class="spinner"></div>
         <p>Calibrating Neural Sensors...</p>
     </div>
-    
+
     <div id="webcam-container">
         <video id="webcam" autoplay playsinline></video>
         <canvas id="output_canvas"></canvas>
     </div>
 
     <div id="ui-panel">
-    <header>
-        <h3>Neural Sandbox</h3>
-        <span class="badge" id="fps-counter">60 FPS</span>
-    </header>
+        <header>
+            <h3>Neural Sandbox Pro</h3>
+            <span class="badge" id="fps-counter">60 FPS</span>
+        </header>
 
-    <div class="telemetry-dashboard">
-        <h4>ENGINE TELEMETRY</h4>
-        <div class="telemetry-grid">
-            <div class="stat-block"><small>Vertex Load</small><span id="stat-vertices">4,000</span></div>
-            <div class="stat-block"><small>Kinetic Velocity</small><span id="stat-velocity">0.00</span></div>
+        <div class="telemetry-dashboard">
+            <h4>ENGINE TELEMETRY</h4>
+            <div class="telemetry-grid">
+                <div class="stat-block"><small>Vertex Load</small><span id="stat-vertices">4,000</span></div>
+                <div class="stat-block"><small>Kinetic Velocity</small><span id="stat-velocity">0.00</span></div>
+            </div>
+            <div class="telemetry-grid" style="margin-top: 8px;">
+                <div class="stat-block" style="border-left-color: #4fc3f7;"><small>Synth Engine</small><span id="stat-audio">MUTED</span></div>
+                <div class="stat-block" style="border-left-color: #4fc3f7;"><small>Physics</small><span id="stat-physics">ACTIVE</span></div>
+            </div>
+            <div class="sensor-status"><span class="status-dot-active"></span> Neural Engine: Operational</div>
         </div>
-        <div class="telemetry-grid" style="margin-top: 8px;">
-            <div class="stat-block" style="border-left-color: #4fc3f7;"><small>Synth Engine</small><span id="stat-audio">MUTED</span></div>
+
+        <div class="control-group">
+            <label>Neural Audio Synthesis</label>
+            <button id="audioToggleBtn" style="background: #2e2e2e; border: 1px solid #444;">Enable Audio Engine</button>
         </div>
-        <div class="sensor-status"><span class="status-dot-active"></span> Neural Engine: Operational</div>
-    </div>
 
-    <div class="control-group">
-        <label>Neural Audio Synthesis</label>
-        <button id="audioToggleBtn" style="background: #2e2e2e; border: 1px solid #444;">Enable Audio Engine</button>
-    </div>
+        <div class="control-group">
+            <label>Physics Engine</label>
+            <button id="physicsToggleBtn" style="background: #2e2e2e; border: 1px solid #444;">Physics: ON</button>
+        </div>
 
-    <div class="control-group">
-        <label>Matrix Modifiers</label>
-        <button id="shieldToggleBtn" style="background: #2e2e2e; border: 1px solid #444;">Deploy Hologram Shield</button>
-    </div>
+        <div class="control-group">
+            <label>Matrix Modifiers</label>
+            <button id="shieldToggleBtn" style="background: #2e2e2e; border: 1px solid #444;">Deploy Hologram Shield</button>
+        </div>
 
-    <div class="control-group">
-    <label>Morph Matrix core</label>
-    <select id="shapeSelector" style="width:100%; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.08); color:white; padding:12px; border-radius:10px; cursor:pointer; font-family:inherit; outline:none; margin-bottom:8px;">
-        <option value="sphere" style="background:#0c0f12;">Sphere Engine</option>
-        <option value="heart" style="background:#0c0f12;">Heart Core</option>
-        <option value="torus" style="background:#0c0f12;">Torus Ring</option>
-        <option value="helix" style="background:#0c0f12;">Double Helix</option>
-        <option value="trefoil" style="background:#0c0f12;">Trefoil Knot</option>
-        <option value="pyramid" style="background:#0c0f12;">Cyber Pyramid</option>
-        <option value="infinity" style="background:#0c0f12;">Infinity Ribbon</option>
-        <option value="cylinder" style="background:#0c0f12;">Cosmic Cylinder</option>
-        <option value="hourglass" style="background:#0c0f12;">Hyper Hourglass</option>
-        <option value="grid" style="background:#0c0f12;">Data Matrix Grid</option>
-        <option value="mobius" style="background:#0c0f12;">Mobius Strip</option>
-        <option value="cube" style="background:#0c0f12;">Cosmic Cube</option>
-    </select>
-</div>
+        <div class="control-group">
+            <label>Morph Matrix core</label>
+            <select id="shapeSelector" style="width:100%; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.08); color:white; padding:12px; border-radius:10px; cursor:pointer; font-family:inherit; outline:none; margin-bottom:8px;">
+                <option value="sphere" style="background:#0c0f12;">Sphere Engine</option>
+                <option value="heart" style="background:#0c0f12;">Heart Core</option>
+                <option value="torus" style="background:#0c0f12;">Torus Ring</option>
+                <option value="helix" style="background:#0c0f12;">Double Helix</option>
+                <option value="trefoil" style="background:#0c0f12;">Trefoil Knot</option>
+                <option value="pyramid" style="background:#0c0f12;">Cyber Pyramid</option>
+                <option value="infinity" style="background:#0c0f12;">Infinity Ribbon</option>
+                <option value="cylinder" style="background:#0c0f12;">Cosmic Cylinder</option>
+                <option value="hourglass" style="background:#0c0f12;">Hyper Hourglass</option>
+                <option value="grid" style="background:#0c0f12;">Data Matrix Grid</option>
+                <option value="mobius" style="background:#0c0f12;">Mobius Strip</option>
+                <option value="cube" style="background:#0c0f12;">Cosmic Cube</option>
+                <option value="fluid" style="background:#0c0f12;">Fluid Simulation</option>
+                <option value="swarm" style="background:#0c0f12;">Intelligent Swarm</option>
+            </select>
+        </div>
 
-    <div class="control-group">
-        <label>Neural Color</label>
-        <input type="color" id="colorPicker" value="#ff007f">
-    </div>
+        <div class="control-group">
+            <label>Neural Color</label>
+            <input type="color" id="colorPicker" value="#ff007f">
+        </div>
 
-    <div class="control-group">
-        <button id="resetBtn">Center Object</button>
-    </div>
+        <div class="control-group">
+            <button id="resetBtn">Center Object</button>
+        </div>
 
-    <div class="hint-box">
-        <h4>INTERFACE MANUAL</h4>
-        <p><strong>• Pinch Fingers:</strong> Grab and drag the core smoothly.</p>
-        <p><strong>• Rotate Hand:</strong> Tilt your hand to spin the object precisely on its Z-axis.</p>
-        <p><strong>• Expand Palm:</strong> Spread fingers to expand particle clusters and shields.</p>
+        <div class="control-group">
+            <button id="recordBtn">Record Gesture</button>
+        </div>
+
+        <div class="control-group">
+            <button id="playbackBtn">Playback</button>
+        </div>
+
+        <div class="control-group">
+            <button id="exportBtn">Export Simulation</button>
+        </div>
+
+        <div class="control-group">
+            <label>Performance Mode</label>
+            <select id="performanceSelect" style="width:100%; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.08); color:white; padding:12px; border-radius:10px; cursor:pointer; font-family:inherit; outline:none;">
+                <option value="ultra">Ultra Quality</option>
+                <option value="high" selected>High Quality</option>
+                <option value="medium">Medium Quality</option>
+                <option value="low">Low Quality</option>
+                <option value="mobile">Mobile Optimized</option>
+            </select>
+        </div>
+
+        <div class="hint-box">
+            <h4>INTERFACE MANUAL</h4>
+            <p><strong>• Pinch Fingers:</strong> Grab and drag the core smoothly.</p>
+            <p><strong>• Rotate Hand:</strong> Tilt your hand to spin the object precisely on its Z-axis.</p>
+            <p><strong>• Expand Palm:</strong> Spread fingers to expand particle clusters and shields.</p>
+            <p><strong>• ✨ Record Gesture:</strong> Click to record hand movements for playback.</p>
+            <p><strong>• ⚙️ Performance:</strong> Adjust quality for your device.</p>
+            <p><strong>• 🎵 Audio Reactivity:</strong> Sound responds to hand velocity and shape.</p>
+        </div>
     </div>
-</div>
 
     <script type="module" src="js/main.js"></script>
 
