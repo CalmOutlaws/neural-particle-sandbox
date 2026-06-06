@@ -11,7 +11,7 @@ export function getShapeData(type, count) {
             const v = Math.random();
             const theta = u * 2.0 * Math.PI;
             const phi = Math.acos(2.0 * v - 1.0);
-            const radius = 6; 
+            const radius = 6;
             points.push({
                 x: radius * Math.sin(phi) * Math.cos(theta),
                 y: radius * Math.sin(phi) * Math.sin(theta),
@@ -22,14 +22,14 @@ export function getShapeData(type, count) {
             const t = (i / count) * Math.PI * 2;
             const baseX = 16 * Math.pow(Math.sin(t), 3) * 0.35;
             const baseY = (13 * Math.cos(t) - 5 * Math.cos(2 * t) - 2 * Math.cos(3 * t) - Math.cos(4 * t)) * 0.35;
-            const baseZ = (Math.random() - 0.5) * 1.5; 
+            const baseZ = (Math.random() - 0.5) * 1.5;
             points.push({ x: baseX, y: baseY, z: baseZ });
 
         } else if (type === 'torus') {
             const u = Math.random() * Math.PI * 2;
             const v = Math.random() * Math.PI * 2;
-            const R = 6.5; 
-            const r = 2.0; 
+            const R = 6.5;
+            const r = 2.0;
             points.push({
                 x: (R + r * Math.cos(v)) * Math.cos(u),
                 y: (R + r * Math.cos(v)) * Math.sin(u),
@@ -51,7 +51,7 @@ export function getShapeData(type, count) {
             });
 
         } else if (type === 'trefoil') {
-            const t = (i / count) * Math.PI * 2 * 3; 
+            const t = (i / count) * Math.PI * 2 * 3;
             points.push({
                 x: (Math.sin(t) + 2 * Math.sin(2 * t)) * 2,
                 y: (Math.cos(t) - 2 * Math.cos(2 * t)) * 2,
@@ -59,9 +59,9 @@ export function getShapeData(type, count) {
             });
 
         } else if (type === 'pyramid') {
-            const h = Math.random() * 8 - 4; 
-            const pct = (h + 4) / 8; 
-            const baseWidth = (1 - pct) * 6; 
+            const h = Math.random() * 8 - 4;
+            const pct = (h + 4) / 8;
+            const baseWidth = (1 - pct) * 6;
             const edge = i % 4;
             let rx = 0, rz = 0;
             if (edge === 0) { rx = baseWidth; rz = (Math.random() * 2 - 1) * baseWidth; }
@@ -110,7 +110,7 @@ export function getShapeData(type, count) {
 
         } else if (type === 'mobius') {
             const u = (i / count) * Math.PI * 2;
-            const v = Math.random() * 2 - 1; 
+            const v = Math.random() * 2 - 1;
             const rad = 6;
             points.push({
                 x: (rad + v * 0.5 * Math.cos(u / 2)) * Math.cos(u),
@@ -128,7 +128,6 @@ export function getShapeData(type, count) {
             else cz = Math.random() > 0.5 ? 4 : -4;
             points.push({ x: cx, y: cy, z: cz });
 
-        // --- FIXED SHAPE 11: Fluid Simulation Template ---
         } else if (type === 'fluid') {
             // Fixed to provide a clean static mathematical matrix mesh base.
             // main.js will apply runtime sin/cos calculations on top of this array!
@@ -139,7 +138,6 @@ export function getShapeData(type, count) {
             const y = (row / gridSize) * 14 - 7;
             points.push({ x: x, y: y, z: 0 });
 
-        // --- FIXED SHAPE 12: Intelligent Swarm ---
         } else if (type === 'swarm') {
             const clusterCount = 5;
             const clusterIndex = Math.floor((i / count) * clusterCount);
@@ -148,10 +146,10 @@ export function getShapeData(type, count) {
             const offsetAngle = (i / count) * Math.PI * 10;
             const offsetRadius = 0.5 + Math.sin(i * 0.05) * 1;
 
-            points.push({ 
-                x: Math.cos(clusterAngle) * clusterRadius + Math.cos(offsetAngle) * offsetRadius, 
-                y: Math.sin(clusterAngle) * clusterRadius + Math.sin(offsetAngle) * offsetRadius, 
-                z: Math.sin(i * 0.07) * 2 
+            points.push({
+                x: Math.cos(clusterAngle) * clusterRadius + Math.cos(offsetAngle) * offsetRadius,
+                y: Math.sin(clusterAngle) * clusterRadius + Math.sin(offsetAngle) * offsetRadius,
+                z: Math.sin(i * 0.07) * 2
             });
 
         } else {
