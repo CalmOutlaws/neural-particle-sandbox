@@ -1,104 +1,57 @@
 # Neural Particle Sandbox
 
-A WebGL gesture-controlled particle physics environment powered by Three.js, Cannon.js, and MediaPipe.
+A WebGL-based, gesture-controlled particle physics sandbox powered by Three.js, Cannon-es, MediaPipe, and the Web Audio API. 
+
+The environment allows users to manipulate thousands of 3D particles in real time using computer vision hand tracking or mouse fallbacks, coupled with procedural shape transformations and adaptive audio synthesis.
 
 ![License](https://img.shields.io/badge/license-MIT-blue.svg)
-![Three.js](https://img.shields.io/badge/Three.js-r160-black)
-![MediaPipe](https://img.shields.io/badge/MediaPipe-Hands-green)
-![Web Audio API](https://img.shields.io/badge/Web_Audio_API-Active-orange)
+![Three.js](https://img.shields.io/badge/Three.js-r128-black)
+![MediaPipe](https://img.shields.io/badge/MediaPipe-Hands-orange)
 
-## Key Features
+---
 
-- **Real-time hand landmark tracking** via MediaPipe Hands (21 landmarks per hand, 30+ FPS on most devices)
-- **Custom vertex layouts** with 15+ procedural shape generators (sphere, torus, helix, trefoil, mobius, etc.)
-- **Web Audio spatial synthesis** with polyphonic oscillator voices and tension-driven filter sweeps
-- **Vector attraction physics** using Cannon-es rigid body solver with configurable force fields
-- **Gesture recording and playback** with JSON export for sharing simulations
-- **Adaptive performance scaling** from 800 to 8,000 particles depending on device capability
-- **Optional glow shader** with per-particle size attenuation and additive blending
+## 🚀 Live Demo
 
-## Tech Stack
+Check out the interactive web application live here:
+👉 **[Launch Neural Particle Sandbox](https://CalmOutlaws.github.io/neural-particle-sandbox/)** 
 
-| Layer | Technology |
-|-------|------------|
-| 3D Rendering | Three.js (WebGL 2.0) |
-| Physics | Cannon-es |
-| Hand Tracking | MediaPipe Hands |
-| Audio | Web Audio API |
-| Module System | ES Modules (native browser importmaps) |
+*(Replace the link above with your deployed GitHub Pages, Vercel, or Netlify URL)*
 
-## Local Setup
+---
 
-This project uses native ES Module imports via importmaps, so it must be served over HTTP. Opening `index.html` directly via `file://` will fail due to CORS restrictions.
+## ✨ Key Features
 
-**Option 1: VS Code Live Server**
-1. Install the [Live Server](https://marketplace.visualstudio.com/items?itemName=ritwickdey.LiveServer) extension
-2. Right-click `index.html` and select "Open with Live Server"
+* **Real-Time Hand Tracking**: Uses MediaPipe Hands to detect 21 hand landmarks via webcam for low-latency pinch, openness, and rotation controls.
+* **Dynamic Physics Engine**: Integrated Cannon-es rigid-body simulation converting hand coordinates into a real-time gravitational vector attraction field.
+* **Interactive Audio Synthesis**: Low-latency synth engine built on the Web Audio API that dynamically modulates oscillator frequencies and filter cutoffs based on hand velocity and tension.
+* **Procedural Vertex Transformations**: Morph particle streams across sphere, torus, cube, and custom mathematical layouts.
+* **Gesture Recording & Timeline Loop**: In-memory circular buffer to record, store, and playback motion path sequences.
+* **Mouse & Touch Fallback**: Automatic cursor degradation when no camera feed is detected or permissions are revoked.
 
-**Option 2: Node.js**
-```bash
-npx serve
-```
+---
 
-**Option 3: Python**
-```bash
-python -m http.server 8000
-```
-Then open `http://localhost:8000` in your browser.
+## 🛠️ Tech Stack
 
-## Controls & Interactions
+* **Rendering Engine**: [Three.js](https://threejs.org/) (WebGL)
+* **Physics Solver**: [Cannon-es](https://github.com/pmndrs/cannon-es)
+* **Computer Vision**: [MediaPipe Hands](https://google.github.io/mediapipe/solutions/hands.html)
+* **Audio**: Native Web Audio API
+* **Architecture**: Vanilla JavaScript (ES Modules)
 
-### Hand Gestures (requires webcam)
+---
 
-| Gesture | Action |
-|---------|--------|
-| Pinch (thumb + index) | Grab and drag the particle core |
-| Rotate hand | Spin the geometry on its Z-axis |
-| Open palm (spread fingers) | Expand particle clusters and shield |
-| Move hand faster | Increase audio gain and particle wave amplitude |
+## 📦 Project Structure
 
-### Mouse Fallback (no webcam)
-
-| Input | Action |
-|-------|--------|
-| Move mouse | Position the particle core (with smooth dampening) |
-| OrbitControls | Click + drag to rotate camera, scroll to zoom |
-
-### UI Panel
-
-- **Audio Engine** ? Toggle polyphonic synthesis on/off
-- **Physics Engine** ? Toggle Cannon-es rigid body simulation
-- **Particle Glow** ? Toggle custom bloom shader
-- **Hologram Shield** ? Toggle wireframe icosahedron shell
-- **Shape Selector** ? Switch between 15+ procedural layouts
-- **Color Picker** ? Change active particle and shield color
-- **Performance Mode** ? Adjust vertex count (800-8,000)
-- **Record / Playback** ? Capture and replay gesture sequences
-- **Export** ? Download simulation data as JSON
-
-## Project Structure
-
-```
+```text
 neural-particle-sandbox/
-??? index.html              # Entry point, importmap, UI panel markup
-??? css/
-?   ??? style.css           # Glassmorphism panel, responsive layout
-??? js/
-?   ??? App.js              # Main loop, state management, engine orchestration
-?   ??? shapes.js           # Procedural vertex layout generators
-?   ??? modules/
-?       ??? CameraEngine.js   # MediaPipe integration, mouse fallback, gesture parsing
-?       ??? ParticleEngine.js # Buffer geometry, custom shaders, morph targets
-?       ??? PhysicsEngine.js  # Cannon-es world, attraction forces, rigid bodies
-?       ??? AudioEngine.js    # Web Audio polyphonic synth, filter sweeps
-?       ??? UiEngine.js       # Gesture recording, playback, state serialization
-??? LICENSE
-```
-
-## License
-
-MIT
-
-## Author
-
-Monish M
+├── index.html              # Shell markup & entry point
+├── styles.css              # Glassmorphic UI overlays
+└── js/
+    ├── App.js              # Central lifecycle loop & module orchestration
+    ├── shapes.js           # Procedural vertex coordinate generators
+    └── modules/
+        ├── ParticleEngine.js # BufferGeometry management & materials
+        ├── CameraEngine.js   # MediaPipe pipeline & gesture processing
+        ├── PhysicsEngine.js  # Cannon-es world & vector solvers
+        ├── AudioEngine.js    # Web Audio synth chain
+        └── UiEngine.js       # Timeline recorder & HUD state binding
