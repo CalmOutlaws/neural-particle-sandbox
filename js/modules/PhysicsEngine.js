@@ -1,60 +1,69 @@
 // PhysicsEngine.js - Cannon-es rigid bodies, vector attraction, and fields
 import * as CANNON from 'cannon-es';
 
+// ---- Configurable physics constants ----
+const PARTICLE_RADIUS = 0.08;
+const PARTICLE_MASS = 0.005;
+const ATTRACTION_STRENGTH = 40.0;
+const GRAVITY = -4.0;
+const SOLVER_ITERATIONS = 5;
+const SOLVER_TOLERANCE = 0.1;
+const LINEAR_DAMPING = 0.05;
+const ANGULAR_DAMPING = 1.0;
+const MIN_DISTANCE = 0.1;
+const DISTANCE_FACTOR = 0.2;
+const DISTANCE_OFFSET = 0.5;
+const SPAWN_RADIUS_MIN = 2;
+const SPAWN_RADIUS_MAX = 8;
+const SPAWN_HEIGHT_OFFSET = 10;
+
 class PhysicsEngine {
   constructor(scene) {
     this.scene = scene;
     this.world = null;
     this.bodies = [];
     this.enabled = false;
-    
-    // Configured for high-performance particle streams
-    this.particleRadius = 0.08;
-    this.particleMass = 0.005;
-    
-    // Dynamic tracking anchors
+
+    // Dynamic tracking anchor
     this.attractionPoint = new CANNON.Vec3(0, 0, 0);
-    this.attractionStrength = 40.0;
-    
-    this.friction = 0.02;
-    this.viscosity = 0.05; // Air/Fluid drag coefficient
-    this.inversionEnabled = false;
+
+    // Pre-allocated reusable objects
+    this._forceVec = new CANNON.Vec3();
+    this._positionsBuffer = null;
   }
 
   init(totalVertices = 1500) {
     if (this.world) this.cleanup();
 
-    // Initialize physics world with minimal solver overhead
     this.world = new CANNON.World();
-    this.world.gravity.set(0, -4.0, 0); // Lighter gravity for floaty, cosmic feel
+    this.world.gravity.set(0, GRAVITY, 0);
 
-    // Optimize solver steps for high particle counts
+    // Optimize solver for high particle counts
     this.world.quatNormalizeSkip = 0;
     this.world.quatNormalizeFast = true;
-    
+
     const solver = new CANNON.GSSolver();
-    solver.iterations = 5; // Reduced iterations for dramatic performance scaling
-    solver.tolerance = 0.1;
+    solver.iterations = SOLVER_ITERATIONS;
+    solver.tolerance = SOLVER_TOLERANCE;
     this.world.solver = solver;
-    
+
     this.world.broadphase = new CANNON.NaiveBroadphase();
 
-    // Create unique physical bodies matching your exact particle counts
+    // Create rigid bodies
     this.bodies = [];
     for (let i = 0; i < totalVertices; i++) {
-      // Cluster them procedurally around center to avoid explosion on spawn
       const theta = Math.random() * Math.PI * 2;
       const phi = Math.acos((Math.random() * 2) - 1);
-      const r = 2 + Math.random() * 8;
+      const r = SPAWN_RADIUS_MIN + Math.random() * SPAWN_RADIUS_MAX;
 
       const sphereBody = new CANNON.Body({
-        mass: this.particleMass,
-        shape: new CANNON.Sphere(this.particleRadius),
-        linearDamping: this.viscosity, // Prevents particles from accelerating to infinity
-        angularDamping: 1.0,
+        mass: PARTICLE_MASS,
+        shape: new CANNON.Sphere(PARTICLE_RADIUS),
+        linearDamping: LINEAR_DAMPING,
+        angularDamping: ANGULAR_DAMPING,
         position: new CANNON.Vec3(
           r * Math.sin(phi) * Math.cos(theta),
-          10 + r * Math.sin(phi) * Math.sin(theta),
+          SPAWN_HEIGHT_OFFSET + r * Math.sin(phi) * Math.sin(theta),
           r * Math.cos(phi)
         )
       });
@@ -63,41 +72,35 @@ class PhysicsEngine {
       this.bodies.push(sphereBody);
     }
 
-    console.log(`PhysicsEngine dynamically calibrated with ${this.bodies.length} active rigid bodies.`);
+    // Pre-allocate positions buffer (reused every frame)
+    this._positionsBuffer = new Float32Array(totalVertices * 3);
   }
 
   update(time, currentHandPos = null) {
     if (!this.world || !this.enabled) return;
 
-    // Step the simulation
     this.world.step(1 / 60, time, 2);
 
-    // Sync tracking system position targets if available
     if (currentHandPos) {
       this.attractionPoint.set(currentHandPos.x, currentHandPos.y, currentHandPos.z);
     }
 
-    // Apply force vectors across entire multi-body system
-    const forceVec = new CANNON.Vec3();
-    const strength = this.inversionEnabled ? -this.attractionStrength : this.attractionStrength;
+    const strength = this.inversionEnabled ? -ATTRACTION_STRENGTH : ATTRACTION_STRENGTH;
 
     for (let i = 0; i < this.bodies.length; i++) {
       const body = this.bodies[i];
 
-      // Calculate directional vector pointing toward your hand tracking coordinate
-      this.attractionPoint.vsub(body.position, forceVec);
-      
-      const distance = forceVec.length();
-      
-      if (distance > 0.1) {
-        forceVec.normalize();
-        
-        // Gravitational attraction formula: Force decreases slightly over distance
-        const scalarForce = (strength * this.particleMass) / (distance * 0.2 + 0.5);
-        forceVec.scale(scalarForce, forceVec);
-        
-        // Inject velocity impulse directly into body profile
-        body.applyForce(forceVec, body.position);
+      this.attractionPoint.vsub(body.position, this._forceVec);
+
+      const distance = this._forceVec.length();
+
+      if (distance > MIN_DISTANCE) {
+        this._forceVec.normalize();
+
+        const scalarForce = (strength * PARTICLE_MASS) / (distance * DISTANCE_FACTOR + DISTANCE_OFFSET);
+        this._forceVec.scale(scalarForce, this._forceVec);
+
+        body.applyForce(this._forceVec, body.position);
       }
     }
   }
@@ -112,12 +115,14 @@ class PhysicsEngine {
   }
 
   getParticlePositions() {
-    const positions = [];
+    if (!this._positionsBuffer) return new Float32Array(0);
     for (let i = 0; i < this.bodies.length; i++) {
       const pos = this.bodies[i].position;
-      positions.push(pos.x, pos.y, pos.z);
+      this._positionsBuffer[i * 3] = pos.x;
+      this._positionsBuffer[i * 3 + 1] = pos.y;
+      this._positionsBuffer[i * 3 + 2] = pos.z;
     }
-    return positions;
+    return this._positionsBuffer;
   }
 
   setInversion(enabled) {
@@ -132,6 +137,7 @@ class PhysicsEngine {
       this.world = null;
     }
     this.bodies = [];
+    this._positionsBuffer = null;
   }
 }
 

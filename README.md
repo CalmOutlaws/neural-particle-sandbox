@@ -1,93 +1,104 @@
-# 🌌 Neural Particle Sandbox 3D
+# Neural Particle Sandbox
 
-A high-performance, interactive 3D particle simulation that bridges the gap between Computer Vision, WebGL, and Spatial Audio Synthesis. Control an adaptive swarm of thousands of particles, interact with responsive UI overlays, and manipulate geometric arrays using real-time hand tracking.
+A WebGL gesture-controlled particle physics environment powered by Three.js, Cannon.js, and MediaPipe.
 
 ![License](https://img.shields.io/badge/license-MIT-blue.svg)
 ![Three.js](https://img.shields.io/badge/Three.js-r160-black)
 ![MediaPipe](https://img.shields.io/badge/MediaPipe-Hands-green)
 ![Web Audio API](https://img.shields.io/badge/Web_Audio_API-Active-orange)
 
----
+## Key Features
 
-## 🚀 Live Demo
-**[Check out the Live Experience here!](https://calmoutlaws.github.io/neural-particle-sandbox/)**
+- **Real-time hand landmark tracking** via MediaPipe Hands (21 landmarks per hand, 30+ FPS on most devices)
+- **Custom vertex layouts** with 15+ procedural shape generators (sphere, torus, helix, trefoil, mobius, etc.)
+- **Web Audio spatial synthesis** with polyphonic oscillator voices and tension-driven filter sweeps
+- **Vector attraction physics** using Cannon-es rigid body solver with configurable force fields
+- **Gesture recording and playback** with JSON export for sharing simulations
+- **Adaptive performance scaling** from 800 to 8,000 particles depending on device capability
+- **Optional glow shader** with per-particle size attenuation and additive blending
 
----
+## Tech Stack
 
-## 🌟 Key Features
+| Layer | Technology |
+|-------|------------|
+| 3D Rendering | Three.js (WebGL 2.0) |
+| Physics | Cannon-es |
+| Hand Tracking | MediaPipe Hands |
+| Audio | Web Audio API |
+| Module System | ES Modules (native browser importmaps) |
 
-### 🖐️ Neural Hand Tracking & Inertial Physics
-Leverages **MediaPipe Hands** to map 21 3D tracking landmarks with a lightweight processing footprint. 
-- **1:1 Precision Rotation:** Features vector-calibrated tracking loops ($Modulus\ \pi$) for smooth, jitter-free wrist rotation tracking on the Z-axis.
-- **Damped Positional Easing:** Custom linear interpolations ($lerp$) mimic physical weight and momentum when grabbing or dragging the particle core.
+## Local Setup
 
-### 🔊 Generative Web Audio API Synth Engine
-Integrates real-time, cross-browser interactive audio synthesis.
-- **Dynamic Frequency Modulation:** Spreading your palm open scales up the geometric expansion while raising the tone's pitch dynamically between $90\text{ Hz}$ and $280\text{ Hz}$.
-- **Kinetic Gain Scaling:** Fast hand motions increase oscillator volume intensity safely, dropping back down to a faint ambient background hum when your hand remains static.
+This project uses native ES Module imports via importmaps, so it must be served over HTTP. Opening `index.html` directly via `file://` will fail due to CORS restrictions.
 
-### 🌀 Advanced Core Geometry Morphology
-- **12 Dynamic Math Models:** Morph seamlessly between a Sphere, Heart, Torus Ring, DNA Double Helix, Trefoil Knot, Cyber Pyramid, Infinity Ribbon, Cosmic Cylinder, Hyper Hourglass, Grid Matrix, Mobius Strip, and a Cosmic Cube.
-- **Velocity-Mapped Trails:** Rapid hand translations alter the point-material matrices, expanding the physical radius of individual vertices to produce trailing cloud embers.
-- **Holographic Protection Shield:** Features an independent Icosahedron Wireframe mesh bound to active scaling variables that deploys on boot to surround the core structure.
+**Option 1: VS Code Live Server**
+1. Install the [Live Server](https://marketplace.visualstudio.com/items?itemName=ritwickdey.LiveServer) extension
+2. Right-click `index.html` and select "Open with Live Server"
 
----
-
-## 🛠️ Tech Stack
-
-- **3D Graphics Engine:** [Three.js](https://threejs.org/) (WebGL 2.0 Acceleration)
-- **Computer Vision API:** [Google MediaPipe Hands](https://google.github.io/mediapipe/)
-- **Audio Engine:** Native Browser Web Audio API (Triangle Wave Oscillators & Damped Gain Nodes)
-- **Frontend Architecture:** Glassmorphic CSS UI Engine featuring scroll track optimizations for low-resolution viewports.
-
----
-
-## 📂 Project Structure
-
-```text
-particle-sandbox/
-├── index.html          # Entry point, glassmorphic UI layout & select element dropdown
-├── README.md           # Portfolio documentation
-├── css/
-│   └── style.css       # Layout rules, mobile media viewports & custom webkit scrollbars
-└── js/
-    ├── main.js         # Loop controller, web audio routing, and tracking interpolation
-    └── shapes.js       # Mathematical algorithms generating vector coordinate data
-
+**Option 2: Node.js**
+```bash
+npx serve
 ```
 
-🎮 How to Use
-Allow Camera Access: Give your browser permission to utilize your webcam. All computing and vision calculations are executed entirely locally on your device's hardware.
+**Option 3: Python**
+```bash
+python -m http.server 8000
+```
+Then open `http://localhost:8000` in your browser.
 
-Pinch to Grab: Bring your index finger and thumb together near the core to anchor your position coordinates and drag the object.
+## Controls & Interactions
 
-Rotate Hand: Tilt your hand side-to-side to roll the geometry smoothly on its rotational axis.
+### Hand Gestures (requires webcam)
 
-Expand Palm: Spread your fingers apart to blow out particle clusters, scale up the hologram shield, and modulate synth engine frequencies.
+| Gesture | Action |
+|---------|--------|
+| Pinch (thumb + index) | Grab and drag the particle core |
+| Rotate hand | Spin the geometry on its Z-axis |
+| Open palm (spread fingers) | Expand particle clusters and shield |
+| Move hand faster | Increase audio gain and particle wave amplitude |
 
-Interactive Sidebar Panel: Use the glassmorphism control hub to trigger audio toggles, swap between 12 mathematical layout styles, or change the active vector color profile.
----
+### Mouse Fallback (no webcam)
 
-## 🔧 Installation & Local Development
+| Input | Action |
+|-------|--------|
+| Move mouse | Position the particle core (with smooth dampening) |
+| OrbitControls | Click + drag to rotate camera, scroll to zoom |
 
-Since this project uses ES6 Modules, it must be served through a web server to avoid CORS issues.
+### UI Panel
 
-1. Clone the repository:
-    git clone [https://github.com/YOUR_USERNAME/neural-particle-sandbox.git](https://github.com/YOUR_USERNAME/neural-particle-sandbox.git)
+- **Audio Engine** ? Toggle polyphonic synthesis on/off
+- **Physics Engine** ? Toggle Cannon-es rigid body simulation
+- **Particle Glow** ? Toggle custom bloom shader
+- **Hologram Shield** ? Toggle wireframe icosahedron shell
+- **Shape Selector** ? Switch between 15+ procedural layouts
+- **Color Picker** ? Change active particle and shield color
+- **Performance Mode** ? Adjust vertex count (800-8,000)
+- **Record / Playback** ? Capture and replay gesture sequences
+- **Export** ? Download simulation data as JSON
 
-2. **Navigate to the folder and start a local server:**
-   - **VS Code:** Use the [Live Server](https://marketplace.visualstudio.com/items?itemName=ritwickdey.LiveServer)      extension.
-   - **Python:** Run `python -m http.server 8000` in the directory.
-   - **Node.js:** Run `npx serve`.
+## Project Structure
 
----
+```
+neural-particle-sandbox/
+??? index.html              # Entry point, importmap, UI panel markup
+??? css/
+?   ??? style.css           # Glassmorphism panel, responsive layout
+??? js/
+?   ??? App.js              # Main loop, state management, engine orchestration
+?   ??? shapes.js           # Procedural vertex layout generators
+?   ??? modules/
+?       ??? CameraEngine.js   # MediaPipe integration, mouse fallback, gesture parsing
+?       ??? ParticleEngine.js # Buffer geometry, custom shaders, morph targets
+?       ??? PhysicsEngine.js  # Cannon-es world, attraction forces, rigid bodies
+?       ??? AudioEngine.js    # Web Audio polyphonic synth, filter sweeps
+?       ??? UiEngine.js       # Gesture recording, playback, state serialization
+??? LICENSE
+```
 
-## 📜 License
-Distributed under the MIT License. See `LICENSE` for more information.
+## License
 
----
+MIT
 
-**Developed by Monish M**  
-*Creative technologist exploring the intersection of AI, Web Audio Synthesis, and 3D graphics.*
+## Author
 
----
+Monish M

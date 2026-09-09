@@ -8,16 +8,35 @@ import { PhysicsEngine } from './modules/PhysicsEngine.js';
 import { AudioEngine } from './modules/AudioEngine.js';
 import { UiEngine } from './modules/UiEngine.js';
 
+// ---- Configurable app constants ----
+const CAMERA_FOV = 60;
+const CAMERA_NEAR = 0.1;
+const CAMERA_FAR = 1000;
+const CAMERA_Z_POS = 35;
+const DAMPING_FACTOR = 0.05;
+const SHIELD_RADIUS = 6.5;
+const SHIELD_OPACITY = 0.12;
+const SHIELD_ROTATION_SPEED = 0.004;
+const SHIELD_SCALE_MULT = 1.4;
+const TENSION_LERP = 0.06;
+const DEFAULT_TENSION = 1.0;
+const MOBILE_VERTEX_COUNT = 1500;
+const DESKTOP_VERTEX_COUNT = 4000;
+const ULTRA_VERTEX_COUNT = 8000;
+const MEDIUM_VERTEX_COUNT = 2000;
+const LOW_VERTEX_COUNT = 1000;
+const MOBILE_OPTIMIZED_COUNT = 800;
+
 class App {
   constructor() {
     this.isInitialized = false;
     this.isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-    this.vertexCount = this.isMobile ? 1500 : 4000;
+    this.vertexCount = this.isMobile ? MOBILE_VERTEX_COUNT : DESKTOP_VERTEX_COUNT;
 
     // Three.js setup
     this.scene = new THREE.Scene();
-    this.camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
-    this.camera.position.set(0, 5, 35);
+    this.camera = new THREE.PerspectiveCamera(CAMERA_FOV, window.innerWidth / window.innerHeight, CAMERA_NEAR, CAMERA_FAR);
+    this.camera.position.set(0, 5, CAMERA_Z_POS);
     this.renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
     this.renderer.setSize(window.innerWidth, window.innerHeight);
     this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
@@ -25,12 +44,12 @@ class App {
 
     this.controls = new OrbitControls(this.camera, this.renderer.domElement);
     this.controls.enableDamping = true;
-    this.controls.dampingFactor = 0.05;
+    this.controls.dampingFactor = DAMPING_FACTOR;
 
     // State management
     this.activeColor = "#ff007f";
-    this.targetTension = 1.0;
-    this.currentTension = 1.0;
+    this.targetTension = DEFAULT_TENSION;
+    this.currentTension = DEFAULT_TENSION;
     this.targetPosition = new THREE.Vector3(0, 0, 0);
     this.handVelocity = 0;
     this.lastHandPos = new THREE.Vector2(0.5, 0.5);
@@ -55,6 +74,9 @@ class App {
     this.lastTime = performance.now();
     this.frameCount = 0;
     this.fps = 60;
+
+    // Reusable objects for animate loop (avoid GC pressure)
+    this._recordVec = new THREE.Vector3();
 
     // Safe Initialization Launch
     this.init();
@@ -83,8 +105,7 @@ class App {
       }
 
       this.isInitialized = true;
-      console.log('Neural Particle Sandbox initialized successfully.');
-      
+
       // Explicitly kickstart animation loop ONLY after setup completely finishes
       this.animate();
     } catch (error) {
@@ -125,6 +146,19 @@ class App {
       }
     };
 
+    // Glow toggle
+    document.getElementById('glowToggleBtn').onclick = (e) => {
+      if (!this.particleEngine) return;
+      const glowOn = this.particleEngine.toggleGlow();
+      if (glowOn) {
+        e.target.innerText = "Glow: ON";
+        e.target.style.background = "#ff007f";
+      } else {
+        e.target.innerText = "Glow: OFF";
+        e.target.style.background = "#2e2e2e";
+      }
+    };
+
     // Color picker
     document.getElementById('colorPicker').addEventListener('input', (e) => {
       this.activeColor = e.target.value;
@@ -141,10 +175,10 @@ class App {
       if (this.particleEngine) this.particleEngine.resetRotation();
     };
 
-    // Physics toggle listener updating
+    // Physics toggle listener
     document.getElementById('physicsToggleBtn').onclick = (e) => {
       if (!this.physicsEngine) return;
-      this.physicsEngine.toggle(this.vertexCount); // Passes the true vertex stream length
+      this.physicsEngine.toggle(this.vertexCount);
       if (this.physicsEngine.enabled) {
         e.target.innerText = "Physics: ON";
         e.target.style.background = "#ff007f";
@@ -172,7 +206,7 @@ class App {
       }
     };
 
-    // Playback gesture (Updated to clean up timeline states)
+    // Playback gesture
     document.getElementById('playbackBtn').onclick = (e) => {
       if (!this.uiEngine) return;
       if (this.uiEngine.getRecordedGestureCount() === 0) {
@@ -185,7 +219,7 @@ class App {
         e.target.innerText = "Stop Playback";
         e.target.style.background = "#ff007f";
       } else {
-        this.uiEngine.stopPlayback(); // Fixes sticky timeline data loops
+        this.uiEngine.stopPlayback();
         e.target.innerText = "Playback";
         e.target.style.background = "#2e2e2e";
       }
@@ -217,11 +251,11 @@ class App {
       if (!this.particleEngine) return;
       const mode = e.target.value;
       switch(mode) {
-        case 'ultra': this.vertexCount = 8000; break;
-        case 'high':  this.vertexCount = this.isMobile ? 1500 : 4000; break;
-        case 'medium': this.vertexCount = this.isMobile ? 800 : 2000; break;
-        case 'low':    this.vertexCount = this.isMobile ? 400 : 1000; break;
-        case 'mobile': this.vertexCount = 800; break;
+        case 'ultra': this.vertexCount = ULTRA_VERTEX_COUNT; break;
+        case 'high':  this.vertexCount = this.isMobile ? MOBILE_VERTEX_COUNT : DESKTOP_VERTEX_COUNT; break;
+        case 'medium': this.vertexCount = this.isMobile ? MOBILE_OPTIMIZED_COUNT : MEDIUM_VERTEX_COUNT; break;
+        case 'low':    this.vertexCount = this.isMobile ? 400 : LOW_VERTEX_COUNT; break;
+        case 'mobile': this.vertexCount = MOBILE_OPTIMIZED_COUNT; break;
       }
       this.particleEngine.setVertexCount(this.vertexCount);
     });
@@ -241,12 +275,12 @@ class App {
 
   createShieldMesh() {
     if (this.shieldMesh) this.scene.remove(this.shieldMesh);
-    const shieldGeo = new THREE.IcosahedronGeometry(6.5, this.isMobile ? 1 : 2);
+    const shieldGeo = new THREE.IcosahedronGeometry(SHIELD_RADIUS, this.isMobile ? 1 : 2);
     const shieldMat = new THREE.MeshBasicMaterial({
       color: this.activeColor,
       wireframe: true,
       transparent: true,
-      opacity: 0.12,
+      opacity: SHIELD_OPACITY,
       blending: THREE.AdditiveBlending
     });
     this.shieldMesh = new THREE.Mesh(shieldGeo, shieldMat);
@@ -282,9 +316,9 @@ class App {
         this.targetTension = trackingData.tension;
         this.handVelocity = trackingData.velocity;
 
-        // Update audio based on hand data
+        // Update audio based on hand data (pass tension for filter sweeps)
         if (this.audioEngine && this.audioEngine.enabled) {
-          this.audioEngine.updateParameters(trackingData.openness, trackingData.velocity);
+          this.audioEngine.updateParameters(trackingData.openness, trackingData.velocity, this.currentTension);
         }
       }
     }
@@ -310,9 +344,8 @@ class App {
     }
 
     if (this.physicsEngine && this.physicsEngine.enabled) {
-      // Pass your target tracking vector directly into the solver sequence
       this.physicsEngine.update(time, this.targetPosition);
-      
+
       const physicsPositions = this.physicsEngine.getParticlePositions();
       if (this.particleEngine) {
         this.particleEngine.updateFromPhysics(physicsPositions);
@@ -322,15 +355,15 @@ class App {
       this.particleEngine.update(time, this.targetPosition, this.targetZRotation, this.currentTension, this.handVelocity);
 
       // Smooth tension
-      this.currentTension = THREE.MathUtils.lerp(this.currentTension, this.targetTension, 0.06);
+      this.currentTension = THREE.MathUtils.lerp(this.currentTension, this.targetTension, TENSION_LERP);
     }
 
     // Update shield
     if (this.shieldActive && this.shieldMesh && this.particleEngine) {
       this.shieldMesh.position.copy(this.particleEngine.getPosition());
-      this.shieldMesh.rotation.z = this.particleEngine.getRotation().z;
-      this.shieldMesh.rotation.y += 0.004;
-      this.shieldMesh.scale.setScalar(this.currentTension * 1.4);
+      this.shieldMesh.rotation.copy(this.particleEngine.getRotation());
+      this.shieldMesh.rotation.y += SHIELD_ROTATION_SPEED;
+      this.shieldMesh.scale.setScalar(this.currentTension * SHIELD_SCALE_MULT);
     }
 
     // Update controls and render

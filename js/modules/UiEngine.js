@@ -1,4 +1,6 @@
-// UiEngine.js - Dynamic DOM binding, telemetry displays, and parameter bindings
+// UiEngine.js - Gesture recording, playback, and state management
+const MAX_RECORD_BUFFER = 1000;
+
 class UiEngine {
   constructor() {
     this.recordedGestures = [];
@@ -25,9 +27,9 @@ class UiEngine {
         tension: gestureData.tension,
         handVelocity: gestureData.handVelocity
       });
-      
-      // Fixed: Circular safe buffer tracking limit
-      if (this.recordedGestures.length > 1000) {
+
+      // Circular buffer limit
+      if (this.recordedGestures.length > MAX_RECORD_BUFFER) {
         this.recordedGestures.shift();
       }
     }
@@ -35,7 +37,7 @@ class UiEngine {
 
   startPlayback() {
     this.isPlayingBack = true;
-    this.playbackStartTime = null; // Forces recalculation on next engine loop update
+    this.playbackStartTime = null;
   }
 
   stopPlayback() {
@@ -54,8 +56,7 @@ class UiEngine {
     }
 
     const elapsed = now - this.playbackStartTime;
-    
-    // Maps standard delta calculations to lookups across a 10ms update interval smoothly
+
     const gestureIndex = Math.min(
       Math.floor((elapsed / 10) % this.recordedGestures.length),
       this.recordedGestures.length - 1
@@ -80,33 +81,6 @@ class UiEngine {
   getRecordedGestureCount() {
     return this.recordedGestures.length;
   }
-
-  // ==========================================
-  // Advanced Feature Stubs / Custom Extensions
-  // ==========================================
-
-  // 28. Complex Multi-Track Recording Timeline
-  startMultiTrackRecording(trackId) { /* TODO: Implement multi-track stream arrays */ }
-  stopMultiTrackRecording(trackId) { /* TODO: Implement multi-track stream arrays */ }
-  playMultiTrack() { /* TODO: Implement cross-fading tracks */ }
-
-  // 29. Complete State Preset Manager
-  saveStatePreset(presetId) { /* TODO: Implement LocalStorage serialization */ }
-  loadStatePreset(presetId) { /* TODO: Implement engine state overwrites */ }
-  deleteStatePreset(presetId) { /* TODO: Implement */ }
-
-  // 30. High-Fidelity Capture Toolkit
-  startVideoCapture() { /* TODO: Implement MediaRecorder canvas hook */ }
-  stopVideoCapture() { /* TODO: Implement canvas stream stop */ }
-  exportVideo() { /* TODO: Implement WebM file blob download */ }
-
-  // 31. Custom Visual Theme Injection
-  applyTheme(themeName) { /* TODO: Implement document.documentElement.style injection */ }
-  saveThemePreference() { /* TODO: Implement */ }
-
-  // 32. Advanced Diagnostics Analytics Overlay
-  updateDiagnosticsOverlay(stats) { /* TODO: Implement layout charts */ }
-  toggleDiagnostics() { /* TODO: Implement */ }
 
   cleanup() {
     this.recordedGestures = [];
